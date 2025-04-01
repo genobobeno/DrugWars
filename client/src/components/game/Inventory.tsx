@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Progress } from "../ui/progress";
 import { useGlobalGameState } from "../../lib/stores/useGlobalGameState";
 import { Badge } from "../ui/badge";
-import { Package, TrendingDown, TrendingUp } from "lucide-react";
+import { Shirt, TrendingDown, TrendingUp } from "lucide-react";
 import { Button } from "../ui/button";
 
 interface InventoryProps {
@@ -32,8 +32,8 @@ export default function Inventory({ onSellClick }: InventoryProps) {
     <Card className="mb-4">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center text-lg">
-          <Package className="mr-2 h-5 w-5" />
-          Inventory
+          <Shirt className="mr-2 h-5 w-5" />
+          Trenchcoat Space
           <Badge variant="outline" className="ml-auto">
             {totalItems}/{gameState.maxInventorySpace}
           </Badge>
@@ -42,19 +42,18 @@ export default function Inventory({ onSellClick }: InventoryProps) {
       <CardContent>
         <Progress 
           value={capacityPercentage} 
-          className="h-2 mb-4" 
-          indicatorColor={
+          className={`h-2 mb-4 ${
             capacityPercentage > 90 
-              ? "bg-red-500" 
+              ? "[&>div]:bg-red-500" 
               : capacityPercentage > 70 
-              ? "bg-amber-500" 
-              : undefined
-          }
+              ? "[&>div]:bg-amber-500" 
+              : ""
+          }`}
         />
         
         {sortedInventory.length === 0 ? (
           <div className="text-center py-2 text-muted-foreground">
-            Your inventory is empty
+            Your trenchcoat is empty
           </div>
         ) : (
           <div className="space-y-2">

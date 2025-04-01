@@ -152,7 +152,6 @@ export default function MarketPlace({ selectedItemToSell, clearSelectedItem }: M
                 <tr>
                   <th className="text-left py-2 font-medium">Drug</th>
                   <th className="text-right py-2 font-medium">Price</th>
-                  <th className="text-right py-2 font-medium">In Stock</th>
                   <th className="text-right py-2 font-medium">Actions</th>
                 </tr>
               </thead>
@@ -166,9 +165,6 @@ export default function MarketPlace({ selectedItemToSell, clearSelectedItem }: M
                     <tr key={item.id} className="border-b last:border-0 hover:bg-muted/30">
                       <td className="py-2">{item.name}</td>
                       <td className="py-2 text-right">${price.toLocaleString()}</td>
-                      <td className="py-2 text-right">
-                        {inInventory ? `${inventoryItem?.quantity}` : '-'}
-                      </td>
                       <td className="py-2 text-right">
                         <Button 
                           variant="outline" 
