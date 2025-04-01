@@ -1,11 +1,10 @@
-import { useState } from "react";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { useGlobalGameState } from "../../lib/stores/useGlobalGameState";
 import { Borough } from "../../types/game";
 import { useAudio } from "../../lib/stores/useAudio";
-import { AlertCircle } from "lucide-react";
+import { MapPin } from "lucide-react";
 
 interface BoroughSelectorProps {
   onBoroughSelected: (borough: Borough) => void;
@@ -14,28 +13,22 @@ interface BoroughSelectorProps {
 export default function BoroughSelector({ onBoroughSelected }: BoroughSelectorProps) {
   const { gameState } = useGlobalGameState();
   const { playHit } = useAudio();
-  const [selectedBorough, setSelectedBorough] = useState<Borough | null>(null);
 
-  // Handle borough selection
+  // Handle borough selection - now directly trigger travel
   const handleSelect = (borough: Borough) => {
-    setSelectedBorough(borough);
-  };
-
-  // Handle travel confirmation
-  const handleConfirmTravel = () => {
-    if (!selectedBorough) return;
-    
+    if (borough.id === gameState.currentBorough?.id) return;
     playHit();
-    onBoroughSelected(selectedBorough);
+    onBoroughSelected(borough);
   };
 
   return (
-    <Card className="w-full max-w-3xl mb-4">
-      <CardHeader>
+    <Card className="w-full mb-4">
+      <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2">
-          <span>Choose Where to Go</span>
+          <MapPin className="h-5 w-5" />
+          <span>Travel to a Borough</span>
           {gameState.currentBorough && (
-            <span className="text-sm text-muted-foreground">
+            <span className="text-sm font-normal text-muted-foreground">
               (Current: {gameState.currentBorough.name})
             </span>
           )}
@@ -53,45 +46,50 @@ export default function BoroughSelector({ onBoroughSelected }: BoroughSelectorPr
               {/* Stylized NYC Map Layout */}
               <div className="col-start-2 row-start-1">
                 <Button 
-                  variant={selectedBorough?.id === "bronx" ? "default" : "outline"}
+                  variant={gameState.currentBorough?.id === "bronx" ? "default" : "outline"}
                   className="w-full h-16"
                   onClick={() => handleSelect(gameState.boroughs.find(b => b.id === "bronx")!)}
+                  disabled={gameState.currentBorough?.id === "bronx"}
                 >
                   Bronx
                 </Button>
               </div>
               <div className="col-start-3 row-start-1">
                 <Button 
-                  variant={selectedBorough?.id === "queens" ? "default" : "outline"}
+                  variant={gameState.currentBorough?.id === "queens" ? "default" : "outline"}
                   className="w-full h-16"
                   onClick={() => handleSelect(gameState.boroughs.find(b => b.id === "queens")!)}
+                  disabled={gameState.currentBorough?.id === "queens"}
                 >
                   Queens
                 </Button>
               </div>
               <div className="col-start-2 row-start-2">
                 <Button 
-                  variant={selectedBorough?.id === "manhattan" ? "default" : "outline"}
+                  variant={gameState.currentBorough?.id === "manhattan" ? "default" : "outline"}
                   className="w-full h-16"
                   onClick={() => handleSelect(gameState.boroughs.find(b => b.id === "manhattan")!)}
+                  disabled={gameState.currentBorough?.id === "manhattan"}
                 >
                   Manhattan
                 </Button>
               </div>
               <div className="col-start-1 row-start-3">
                 <Button 
-                  variant={selectedBorough?.id === "brooklyn" ? "default" : "outline"}
+                  variant={gameState.currentBorough?.id === "brooklyn" ? "default" : "outline"}
                   className="w-full h-16"
                   onClick={() => handleSelect(gameState.boroughs.find(b => b.id === "brooklyn")!)}
+                  disabled={gameState.currentBorough?.id === "brooklyn"}
                 >
                   Brooklyn
                 </Button>
               </div>
               <div className="col-start-2 row-start-3">
                 <Button 
-                  variant={selectedBorough?.id === "staten_island" ? "default" : "outline"}
+                  variant={gameState.currentBorough?.id === "staten_island" ? "default" : "outline"}
                   className="w-full h-16"
                   onClick={() => handleSelect(gameState.boroughs.find(b => b.id === "staten_island")!)}
+                  disabled={gameState.currentBorough?.id === "staten_island"}
                 >
                   Staten Island
                 </Button>
@@ -104,9 +102,10 @@ export default function BoroughSelector({ onBoroughSelected }: BoroughSelectorPr
               {gameState.boroughs.map((borough) => (
                 <Button
                   key={borough.id}
-                  variant={selectedBorough?.id === borough.id ? "default" : "outline"}
+                  variant={gameState.currentBorough?.id === borough.id ? "default" : "outline"}
                   className="justify-between text-start h-14"
                   onClick={() => handleSelect(borough)}
+                  disabled={borough.id === gameState.currentBorough?.id}
                 >
                   <div className="flex flex-col items-start">
                     <span>{borough.name}</span>
@@ -120,28 +119,6 @@ export default function BoroughSelector({ onBoroughSelected }: BoroughSelectorPr
             </div>
           </TabsContent>
         </Tabs>
-
-        {selectedBorough && (
-          <div className="mt-4">
-            <div className="flex items-start mb-2">
-              <h3 className="text-lg font-medium">{selectedBorough.name}</h3>
-              {selectedBorough.id === gameState.currentBorough?.id && (
-                <span className="ml-2 text-amber-500 text-sm flex items-center">
-                  <AlertCircle className="w-4 h-4 mr-1" />
-                  You're already here
-                </span>
-              )}
-            </div>
-            <p className="text-muted-foreground mb-3">{selectedBorough.description}</p>
-            <Button 
-              className="w-full"
-              disabled={selectedBorough.id === gameState.currentBorough?.id}
-              onClick={handleConfirmTravel}
-            >
-              Travel to {selectedBorough.name}
-            </Button>
-          </div>
-        )}
       </CardContent>
     </Card>
   );
