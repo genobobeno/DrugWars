@@ -23,9 +23,8 @@ export default function MainGame() {
   } = useGlobalGameState();
   const { playHit, playSuccess } = useAudio();
   const [selectedItemToSell, setSelectedItemToSell] = useState<string | null>(null);
-  const [gamePhase, setGamePhase] = useState<'travel' | 'market'>('travel');
   
-  // Handle initial game setup and daily updates
+  // Handle initial game setup
   useEffect(() => {
     if (!gameState.currentBorough && gameState.boroughs.length > 0) {
       // Set initial borough if not set (first time starting)
@@ -35,6 +34,11 @@ export default function MainGame() {
   
   // Handle borough selection
   const handleBoroughSelected = (borough: Borough) => {
+    if (borough.id === gameState.currentBorough?.id) {
+      return; // Already in this borough
+    }
+    
+    // Set new borough
     setCurrentBorough(borough);
     
     // Check for random event on travel (20% chance)
@@ -42,18 +46,19 @@ export default function MainGame() {
       const event = getRandomEvent('travel', gameState);
       if (event) {
         setGameEvent(event);
+        return;
       }
     }
     
-    setGamePhase('market');
+    // Update prices and progress to next day when traveling
+    updatePrices();
+    progressDay();
+    playSuccess();
   };
   
   // Handle ending the day
   const handleEndDay = () => {
     playSuccess();
-    
-    // Apply daily interest to debt
-    // This is handled in the progressDay function in useGlobalGameState
     
     // Check for random events on end of day (30% chance)
     if (Math.random() < 0.3) {
@@ -67,7 +72,6 @@ export default function MainGame() {
     // Update prices and progress to next day
     updatePrices();
     progressDay();
-    setGamePhase('travel');
   };
   
   // Handle selling an item
@@ -79,47 +83,44 @@ export default function MainGame() {
   // Handle event closed
   const handleEventClosed = () => {
     clearGameEvent();
-    
-    // If the event was triggered by ending the day, continue to the next day
-    if (gamePhase === 'market') {
-      updatePrices();
-      progressDay();
-      setGamePhase('travel');
-    }
   };
   
   return (
     <div className="container mx-auto max-w-5xl p-4">
-      {/* Day Counter */}
-      <DayCounter />
+      {/* Day Counter and Player Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <DayCounter />
+        <PlayerStats />
+      </div>
       
-      {/* Player Stats */}
-      <PlayerStats />
+      {/* Borough Selector */}
+      <div className="mb-4">
+        <BoroughSelector onBoroughSelected={handleBoroughSelected} />
+      </div>
       
       {/* Main Game Area */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Market and Items */}
         <div className="md:col-span-2">
-          {gamePhase === 'travel' ? (
-            <BoroughSelector onBoroughSelected={handleBoroughSelected} />
-          ) : (
-            <MarketPlace selectedItemToSell={selectedItemToSell} clearSelectedItem={() => setSelectedItemToSell(null)} />
-          )}
+          <MarketPlace 
+            selectedItemToSell={selectedItemToSell} 
+            clearSelectedItem={() => setSelectedItemToSell(null)} 
+          />
         </div>
         
+        {/* Inventory and End Day */}
         <div className="md:col-span-1">
           <Inventory onSellClick={handleSellClick} />
           
-          {gamePhase === 'market' && (
-            <Button 
-              className="w-full mb-4" 
-              onClick={handleEndDay}
-              size="lg"
-            >
-              <CalendarDays className="mr-2 h-5 w-5" />
-              End Day {gameState.currentDay}
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          )}
+          <Button 
+            className="w-full mb-4" 
+            onClick={handleEndDay}
+            size="lg"
+          >
+            <CalendarDays className="mr-2 h-5 w-5" />
+            End Day {gameState.currentDay}
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
         </div>
       </div>
       
