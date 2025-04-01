@@ -9,7 +9,11 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
-export default function PlayerStats() {
+interface PlayerStatsProps {
+  headerHidden?: boolean;
+}
+
+export default function PlayerStats({ headerHidden = false }: PlayerStatsProps) {
   const { gameState } = useGlobalGameState();
   const [displayImage, setDisplayImage] = useState(""); // Will store image for selected borough
   
@@ -44,19 +48,21 @@ export default function PlayerStats() {
   const bankFormatted = gameState?.bank?.toLocaleString() || "0";
   
   return (
-    <div className="bg-black text-white rounded-md overflow-hidden mb-4">
-      {/* This would display an actual image of the borough */}
-      <div className="h-32 bg-gray-800 flex items-center justify-center text-center p-4">
-        <p className="text-muted italic">
-          {gameState?.currentBorough 
-            ? `You are in ${gameState.currentBorough.name}` 
-            : "Choose a borough to begin"}
-        </p>
-      </div>
+    <div className={`${headerHidden ? "" : "bg-black"} text-white rounded-md overflow-hidden ${headerHidden ? "" : "mb-4"}`}>
+      {/* Borough image - only show if header is not hidden */}
+      {!headerHidden && (
+        <div className="h-32 bg-gray-800 flex items-center justify-center text-center p-4">
+          <p className="text-muted italic">
+            {gameState?.currentBorough 
+              ? `You are in ${gameState.currentBorough.name}` 
+              : "Choose a borough to begin"}
+          </p>
+        </div>
+      )}
       
       {/* Scoreboard */}
       <div className="p-4">
-        <h3 className="text-sm uppercase tracking-wider mb-3 opacity-70">Player Stats</h3>
+        {!headerHidden && <h3 className="text-sm uppercase tracking-wider mb-3 opacity-70">Player Stats</h3>}
         
         <div className="grid grid-cols-2 gap-3">
           {/* Cash - Green */}

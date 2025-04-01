@@ -88,15 +88,18 @@ export default function MainGame() {
   
   return (
     <div className="container mx-auto max-w-5xl p-4">
-      {/* Day Counter and Player Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-        <DayCounter />
-        <PlayerStats />
-      </div>
-      
-      {/* Borough Selector */}
-      <div className="mb-4">
-        <BoroughSelector onBoroughSelected={handleBoroughSelected} />
+      {/* Unified Header Section with Stats and Map */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-0 mb-4 bg-gray-900 rounded-lg overflow-hidden shadow-md">
+        {/* Left Side - Day Counter and Player Stats */}
+        <div className="p-5 space-y-4">
+          <DayCounter />
+          <PlayerStats headerHidden={true} />
+        </div>
+        
+        {/* Right Side - Borough Selector Map */}
+        <div className="border-l border-gray-800">
+          <BoroughSelector onBoroughSelected={handleBoroughSelected} headerHidden={true} />
+        </div>
       </div>
       
       {/* Main Game Area */}

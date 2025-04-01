@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { Card, CardContent } from "../ui/card";
 import { Progress } from "../ui/progress";
 import { useGlobalGameState } from "../../lib/stores/useGlobalGameState";
+import { CalendarDays } from "lucide-react";
 
 export default function DayCounter() {
   const { gameState } = useGlobalGameState();
@@ -17,26 +17,28 @@ export default function DayCounter() {
   const remainingDays = gameState.totalDays - gameState.currentDay;
   
   return (
-    <Card className="mb-4">
-      <CardContent className="pt-4">
-        <div className="flex justify-between items-center mb-2">
-          <div>
-            <h3 className="text-lg font-medium">Day {gameState.currentDay}</h3>
-            <p className="text-sm text-muted-foreground">
-              {remainingDays} {remainingDays === 1 ? 'day' : 'days'} remaining
-            </p>
-          </div>
-          <div className="text-right">
-            <p className="text-sm">
-              {progressValue < 33 && "Just getting started"}
-              {progressValue >= 33 && progressValue < 66 && "Halfway there"}
-              {progressValue >= 66 && "Final stretch!"}
-            </p>
-          </div>
-        </div>
-        
-        <Progress value={progressValue} className="h-2" />
-      </CardContent>
-    </Card>
+    <div className="text-white">
+      <div className="flex items-center gap-2 mb-1">
+        <CalendarDays className="h-5 w-5 text-yellow-400" />
+        <h3 className="text-lg font-medium flex-1">Day {gameState.currentDay}</h3>
+        <span className="text-sm opacity-90 bg-gray-800 px-2 py-1 rounded-full">
+          {remainingDays} {remainingDays === 1 ? 'day' : 'days'} left
+        </span>
+      </div>
+      
+      <div className="relative mb-1">
+        <Progress 
+          value={progressValue} 
+          className="h-2 bg-gray-700 [&>div]:bg-yellow-400" 
+        />
+      </div>
+      
+      <p className="text-xs text-gray-400 text-right italic">
+        {progressValue < 33 && "Just getting started with your empire"}
+        {progressValue >= 33 && progressValue < 66 && "Halfway through your 30-day challenge"}
+        {progressValue >= 66 && progressValue < 90 && "Final stretch! Make it count"}
+        {progressValue >= 90 && "Last few days! Go big or go home"}
+      </p>
+    </div>
   );
 }

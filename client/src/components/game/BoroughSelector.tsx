@@ -2,14 +2,14 @@ import { useGlobalGameState } from "../../lib/stores/useGlobalGameState";
 import { Borough } from "../../types/game";
 import { useAudio } from "../../lib/stores/useAudio";
 import { MapPin } from "lucide-react";
-import { Card, CardHeader, CardTitle } from "../ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 
 interface BoroughSelectorProps {
   onBoroughSelected: (borough: Borough) => void;
+  headerHidden?: boolean;
 }
 
-export default function BoroughSelector({ onBoroughSelected }: BoroughSelectorProps) {
+export default function BoroughSelector({ onBoroughSelected, headerHidden = false }: BoroughSelectorProps) {
   const { gameState } = useGlobalGameState();
   const { playHit } = useAudio();
 
@@ -21,22 +21,25 @@ export default function BoroughSelector({ onBoroughSelected }: BoroughSelectorPr
   };
 
   return (
-    <Card className="w-full mb-4 overflow-hidden">
-      <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-2">
-          <MapPin className="h-5 w-5" />
-          <span>New York City Map</span>
-          {gameState.currentBorough && (
-            <span className="text-sm font-normal text-muted-foreground">
-              (Current: {gameState.currentBorough.name})
-            </span>
-          )}
-        </CardTitle>
-      </CardHeader>
+    <div className={`${headerHidden ? "" : "bg-white border rounded-lg shadow-sm w-full mb-4 overflow-hidden"}`}>
+      {/* Header - Only shown if headerHidden is false */}
+      {!headerHidden && (
+        <div className="border-b px-6 py-4">
+          <div className="flex items-center gap-2 font-semibold">
+            <MapPin className="h-5 w-5" />
+            <span>New York City Map</span>
+            {gameState.currentBorough && (
+              <span className="text-sm font-normal text-muted-foreground">
+                (Current: {gameState.currentBorough.name})
+              </span>
+            )}
+          </div>
+        </div>
+      )}
       
       {/* Interactive NYC Map */}
       <div className="relative bg-blue-50 h-[250px] w-full">
-        {/* This is a simplified outline of NYC with clickable boroughs */}
+        {/* NYC Map SVG */}
         <svg viewBox="0 0 500 500" className="h-full w-full">
           {/* Water background */}
           <rect x="0" y="0" width="500" height="500" fill="#c9e6ff" />
@@ -158,11 +161,11 @@ export default function BoroughSelector({ onBoroughSelected }: BoroughSelectorPr
       </div>
       
       {/* Borough description - shows when a borough is selected */}
-      {gameState.currentBorough && (
+      {gameState.currentBorough && !headerHidden && (
         <div className="p-3 border-t border-dashed border-gray-200 bg-gray-50 text-sm">
           <p className="italic text-gray-600">{gameState.currentBorough.description}</p>
         </div>
       )}
-    </Card>
+    </div>
   );
 }
