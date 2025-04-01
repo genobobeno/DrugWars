@@ -38,196 +38,123 @@ export default function BoroughSelector({ onBoroughSelected, headerHidden = fals
       )}
       
       {/* Interactive NYC Map */}
-      <div className="relative bg-gray-900 h-[270px] w-full">
-        {/* NYC Map SVG - More accurate and stylized representation */}
-        <svg viewBox="0 0 500 500" className="h-full w-full">
-          {/* Water background */}
-          <rect x="0" y="0" width="500" height="500" fill="#0d1b2a" />
-          
-          {/* Water details - rivers, bay */}
-          <path 
-            d="M50,150 C150,100 200,200 150,350 C100,450 50,400 50,350 Z" 
-            fill="#193b5e" 
-            opacity="0.6"
-          />
-          <path 
-            d="M350,50 C400,100 420,200 380,350 C320,450 200,400 100,400 C50,400 30,350 50,300 C80,250 150,200 200,250 C250,300 300,250 350,50 Z" 
-            fill="#193b5e" 
-            opacity="0.3"
-          />
-          
-          {/* Neighboring land masses */}
-          <path 
-            d="M0,0 L0,500 L50,500 C50,400 80,300 50,200 C20,100 0,50 0,0 Z" 
-            fill="#1e293b" 
-            stroke="#334155"
-            strokeWidth="1"
-          />
-          <path 
-            d="M500,0 L500,500 L400,500 C450,450 470,400 480,350 C490,300 500,200 500,0 Z" 
-            fill="#1e293b"
-            stroke="#334155"
-            strokeWidth="1"
-          />
-          
-          {/* Main street grid - faint overlay */}
-          <g opacity="0.1" stroke="#f8fafc" strokeWidth="0.5">
-            {/* Manhattan grid */}
-            <line x1="240" y1="100" x2="240" y2="300" />
-            <line x1="250" y1="100" x2="250" y2="300" />
-            <line x1="230" y1="120" x2="250" y2="120" />
-            <line x1="230" y1="140" x2="250" y2="140" />
-            <line x1="230" y1="160" x2="250" y2="160" />
-            <line x1="230" y1="180" x2="250" y2="180" />
-            <line x1="230" y1="200" x2="250" y2="200" />
-            <line x1="230" y1="220" x2="250" y2="220" />
-            <line x1="230" y1="240" x2="250" y2="240" />
-            <line x1="230" y1="260" x2="250" y2="260" />
-            <line x1="230" y1="280" x2="250" y2="280" />
+      <div className="relative bg-gray-900 h-[300px] w-full overflow-hidden">
+        {/* NYC Map Background Image */}
+        <img 
+          src="/images/nyc-map.svg" 
+          alt="NYC Map" 
+          className="w-full h-full object-cover"
+        />
+        
+        {/* Interactive Borough Overlays */}
+        <div className="absolute inset-0">
+          <svg viewBox="0 0 800 800" className="w-full h-full">
+            {/* Staten Island - Bottom Left */}
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <path 
+                    d="M150,550 C200,530 250,550 280,580 C310,610 300,650 250,670 C200,690 150,670 130,630 C110,590 130,560 150,550 Z" 
+                    fill={gameState.currentBorough?.id === "staten_island" ? "#4f46e5" : "#00000000"}
+                    stroke={gameState.currentBorough?.id === "staten_island" ? "#ffffff" : "#ffffff50"}
+                    strokeWidth="2"
+                    opacity={gameState.currentBorough?.id === "staten_island" ? "0.7" : "0.2"}
+                    className={`cursor-pointer hover:opacity-50 hover:stroke-white transition-all duration-200`}
+                    onClick={() => handleSelect(gameState.boroughs.find(b => b.id === "staten_island")!)}
+                  />
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  <div className="text-sm font-semibold">Staten Island</div>
+                  <p className="text-xs">Suburban and isolated with less police presence</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             
-            {/* Brooklyn/Queens grids */}
-            <line x1="280" y1="280" x2="380" y2="280" />
-            <line x1="280" y1="300" x2="380" y2="300" />
-            <line x1="280" y1="320" x2="380" y2="320" />
-            <line x1="300" y1="260" x2="300" y2="360" />
-            <line x1="320" y1="260" x2="320" y2="360" />
-            <line x1="340" y1="260" x2="340" y2="360" />
-            <line x1="360" y1="260" x2="360" y2="360" />
-          </g>
-          
-          {/* Bridges and connections */}
-          <line x1="255" y1="185" x2="320" y2="220" stroke="#94a3b8" strokeWidth="2" />
-          <line x1="240" y1="260" x2="290" y2="290" stroke="#94a3b8" strokeWidth="2" />
-          <line x1="180" y1="350" x2="240" y2="330" stroke="#94a3b8" strokeWidth="2" opacity="0.7" />
-          
-          {/* Landmarks */}
-          {/* Statue of Liberty */}
-          <circle cx="170" cy="330" r="2" fill="#22c55e" />
-          <text x="153" y="320" className="text-[8px] fill-white opacity-60">Liberty Island</text>
-          
-          {/* Central Park */}
-          <rect x="233" y="160" width="14" height="40" fill="#064e3b" opacity="0.6" stroke="#10b981" strokeWidth="0.5" />
-          
-          {/* JFK Airport */}
-          <rect x="380" y="310" width="10" height="10" fill="none" stroke="#a1a1aa" strokeWidth="0.8" />
-          <text x="393" y="315" className="text-[6px] fill-white opacity-60">JFK</text>
-          
-          {/* Yankee Stadium */}
-          <circle cx="250" cy="110" r="2" fill="#3b82f6" />
-          
-          {/* Coney Island */}
-          <path d="M330,370 L340,370 L340,375 L330,375 Z" fill="#eab308" />
-          
-          {/* Battery Park */}
-          <circle cx="230" cy="300" r="2" fill="#22c55e" />
-          
-          {/* Staten Island */}
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <path 
-                  d="M80,350 Q100,340 130,350 Q160,360 150,390 Q140,420 110,430 Q70,430 60,400 Q50,370 80,350 Z" 
-                  fill={gameState.currentBorough?.id === "staten_island" ? "#6366f1" : "#94a3b8"}
-                  stroke="#f8fafc" 
-                  strokeWidth="1.5"
-                  className={`cursor-pointer hover:fill-indigo-400 ${gameState.currentBorough?.id === "staten_island" ? "" : "hover:fill-gray-400"}`}
-                  onClick={() => handleSelect(gameState.boroughs.find(b => b.id === "staten_island")!)}
-                />
-              </TooltipTrigger>
-              <TooltipContent side="top">
-                <div className="text-sm font-semibold">Staten Island</div>
-                <p className="text-xs">Suburban and isolated with less police presence</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          
-          {/* Brooklyn */}
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <path 
-                  d="M250,300 Q270,290 300,285 Q330,280 350,310 Q370,340 340,370 Q300,390 250,370 Q230,360 230,340 Q230,310 250,300 Z" 
-                  fill={gameState.currentBorough?.id === "brooklyn" ? "#6366f1" : "#94a3b8"}
-                  stroke="#f8fafc" 
-                  strokeWidth="1.5"
-                  className={`cursor-pointer hover:fill-indigo-400 ${gameState.currentBorough?.id === "brooklyn" ? "" : "hover:fill-gray-400"}`}
-                  onClick={() => handleSelect(gameState.boroughs.find(b => b.id === "brooklyn")!)}
-                />
-              </TooltipTrigger>
-              <TooltipContent side="top">
-                <div className="text-sm font-semibold">Brooklyn</div>
-                <p className="text-xs">Trendy and diverse with artsy neighborhoods</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          
-          {/* Queens */}
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <path 
-                  d="M320,150 Q350,140 380,160 Q410,180 405,220 Q400,260 380,280 Q340,300 320,280 Q300,260 305,210 Q310,170 320,150 Z" 
-                  fill={gameState.currentBorough?.id === "queens" ? "#6366f1" : "#94a3b8"}
-                  stroke="#f8fafc" 
-                  strokeWidth="1.5"
-                  className={`cursor-pointer hover:fill-indigo-400 ${gameState.currentBorough?.id === "queens" ? "" : "hover:fill-gray-400"}`}
-                  onClick={() => handleSelect(gameState.boroughs.find(b => b.id === "queens")!)}
-                />
-              </TooltipTrigger>
-              <TooltipContent side="top">
-                <div className="text-sm font-semibold">Queens</div>
-                <p className="text-xs">Diverse and residential with many cultural communities</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          
-          {/* Manhattan */}
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <path 
-                  d="M230,120 Q240,110 250,110 Q260,110 260,150 Q260,200 250,250 Q240,300 230,300 Q220,300 220,250 Q220,170 230,120 Z" 
-                  fill={gameState.currentBorough?.id === "manhattan" ? "#6366f1" : "#94a3b8"}
-                  stroke="#f8fafc" 
-                  strokeWidth="1.5"
-                  className={`cursor-pointer hover:fill-indigo-400 ${gameState.currentBorough?.id === "manhattan" ? "" : "hover:fill-gray-400"}`}
-                  onClick={() => handleSelect(gameState.boroughs.find(b => b.id === "manhattan")!)}
-                />
-              </TooltipTrigger>
-              <TooltipContent side="top">
-                <div className="text-sm font-semibold">Manhattan</div>
-                <p className="text-xs">The heart of NYC, expensive and heavily policed</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          
-          {/* Bronx */}
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <path 
-                  d="M230,120 Q240,100 270,90 Q300,80 330,110 Q340,130 320,150 Q290,170 260,150 Q240,140 230,120 Z" 
-                  fill={gameState.currentBorough?.id === "bronx" ? "#6366f1" : "#94a3b8"}
-                  stroke="#f8fafc" 
-                  strokeWidth="1.5"
-                  className={`cursor-pointer hover:fill-indigo-400 ${gameState.currentBorough?.id === "bronx" ? "" : "hover:fill-gray-400"}`}
-                  onClick={() => handleSelect(gameState.boroughs.find(b => b.id === "bronx")!)}
-                />
-              </TooltipTrigger>
-              <TooltipContent side="top">
-                <div className="text-sm font-semibold">The Bronx</div>
-                <p className="text-xs">Rough and varied, with high crime areas and family neighborhoods</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          
-          {/* Borough labels - white text on dark background */}
-          <text x="110" y="390" className="text-xs font-semibold fill-white opacity-80">Staten Island</text>
-          <text x="280" y="340" className="text-xs font-semibold fill-white opacity-80">Brooklyn</text>
-          <text x="370" y="230" className="text-xs font-semibold fill-white opacity-80">Queens</text>
-          <text x="230" y="230" className="text-xs font-semibold fill-white opacity-80">Manhattan</text>
-          <text x="240" y="120" className="text-xs font-semibold fill-white opacity-80">Bronx</text>
-        </svg>
+            {/* Brooklyn - Bottom Right */}
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <path 
+                    d="M430,480 C450,460 500,450 550,480 C600,510 620,560 590,600 C560,640 500,650 450,630 C400,610 380,540 430,480 Z" 
+                    fill={gameState.currentBorough?.id === "brooklyn" ? "#4f46e5" : "#00000000"}
+                    stroke={gameState.currentBorough?.id === "brooklyn" ? "#ffffff" : "#ffffff50"}
+                    strokeWidth="2"
+                    opacity={gameState.currentBorough?.id === "brooklyn" ? "0.7" : "0.2"}
+                    className={`cursor-pointer hover:opacity-50 hover:stroke-white transition-all duration-200`}
+                    onClick={() => handleSelect(gameState.boroughs.find(b => b.id === "brooklyn")!)}
+                  />
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  <div className="text-sm font-semibold">Brooklyn</div>
+                  <p className="text-xs">Trendy and diverse with artsy neighborhoods</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            
+            {/* Queens - Mid Right */}
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <path 
+                    d="M430,400 C460,360 520,330 580,360 C640,390 670,450 650,520 C630,590 560,610 500,580 C440,550 400,440 430,400 Z" 
+                    fill={gameState.currentBorough?.id === "queens" ? "#4f46e5" : "#00000000"}
+                    stroke={gameState.currentBorough?.id === "queens" ? "#ffffff" : "#ffffff50"}
+                    strokeWidth="2"
+                    opacity={gameState.currentBorough?.id === "queens" ? "0.7" : "0.2"}
+                    className={`cursor-pointer hover:opacity-50 hover:stroke-white transition-all duration-200`}
+                    onClick={() => handleSelect(gameState.boroughs.find(b => b.id === "queens")!)}
+                  />
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  <div className="text-sm font-semibold">Queens</div>
+                  <p className="text-xs">Diverse and residential with many cultural communities</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            
+            {/* Manhattan - Center */}
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <path 
+                    d="M400,180 C410,170 420,170 425,200 C430,240 430,320 420,380 C410,440 390,480 380,480 C370,480 360,450 365,390 C370,330 380,220 400,180 Z" 
+                    fill={gameState.currentBorough?.id === "manhattan" ? "#4f46e5" : "#00000000"}
+                    stroke={gameState.currentBorough?.id === "manhattan" ? "#ffffff" : "#ffffff50"}
+                    strokeWidth="2"
+                    opacity={gameState.currentBorough?.id === "manhattan" ? "0.7" : "0.2"}
+                    className={`cursor-pointer hover:opacity-50 hover:stroke-white transition-all duration-200`}
+                    onClick={() => handleSelect(gameState.boroughs.find(b => b.id === "manhattan")!)}
+                  />
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  <div className="text-sm font-semibold">Manhattan</div>
+                  <p className="text-xs">The heart of NYC, expensive and heavily policed</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            
+            {/* Bronx - Top */}
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <path 
+                    d="M390,180 C410,140 460,120 520,140 C580,160 610,220 580,260 C550,300 490,320 440,300 C390,280 370,220 390,180 Z" 
+                    fill={gameState.currentBorough?.id === "bronx" ? "#4f46e5" : "#00000000"}
+                    stroke={gameState.currentBorough?.id === "bronx" ? "#ffffff" : "#ffffff50"}
+                    strokeWidth="2"
+                    opacity={gameState.currentBorough?.id === "bronx" ? "0.7" : "0.2"}
+                    className={`cursor-pointer hover:opacity-50 hover:stroke-white transition-all duration-200`}
+                    onClick={() => handleSelect(gameState.boroughs.find(b => b.id === "bronx")!)}
+                  />
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  <div className="text-sm font-semibold">The Bronx</div>
+                  <p className="text-xs">Rough and varied, with high crime areas and family neighborhoods</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </svg>
+        </div>
         
         {/* Compass Rose */}
         <div className="absolute top-2 right-2 w-12 h-12 opacity-40">
