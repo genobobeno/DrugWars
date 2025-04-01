@@ -137,6 +137,58 @@ export default function MarketPlace({ selectedItemToSell, clearSelectedItem }: M
   
   return (
     <>
+      {/* Available Drugs Panel */}
+      <Card className="mb-4">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center">
+            <Banknote className="mr-2 h-5 w-5" />
+            Available Drugs
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="border-b">
+                <tr>
+                  <th className="text-left py-2 font-medium">Drug</th>
+                  <th className="text-right py-2 font-medium">Price</th>
+                  <th className="text-right py-2 font-medium">In Stock</th>
+                  <th className="text-right py-2 font-medium">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {gameState.items.map((item) => {
+                  const price = gameState.currentPrices[item.id] || 0;
+                  const inventoryItem = gameState.inventory.find(i => i.id === item.id);
+                  const inInventory = inventoryItem && inventoryItem.quantity > 0;
+                  
+                  return (
+                    <tr key={item.id} className="border-b last:border-0 hover:bg-muted/30">
+                      <td className="py-2">{item.name}</td>
+                      <td className="py-2 text-right">${price.toLocaleString()}</td>
+                      <td className="py-2 text-right">
+                        {inInventory ? `${inventoryItem?.quantity}` : '-'}
+                      </td>
+                      <td className="py-2 text-right">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="h-7 text-xs"
+                          onClick={() => handleSelectItem(item)}
+                        >
+                          {inInventory ? 'Buy/Sell' : 'Buy'}
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
+    
+      {/* Market Place */}
       <Card className="mb-4">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center">
