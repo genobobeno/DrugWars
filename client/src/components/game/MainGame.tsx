@@ -6,6 +6,7 @@ import BoroughSelector from "./BoroughSelector";
 import Inventory from "./Inventory";
 import MarketPlace from "./MarketPlace";
 import EventDisplay from "./EventDisplay";
+import Banking from "./Banking";
 import { getRandomEvent } from "../../lib/gameEvents";
 import { Borough } from "../../types/game";
 import { Button } from "../ui/button";
@@ -108,9 +109,11 @@ export default function MainGame() {
           />
         </div>
         
-        {/* Inventory and End Day */}
+        {/* Inventory, Banking, and End Day */}
         <div className="md:col-span-1">
           <Inventory onSellClick={handleSellClick} />
+          
+          <Banking />
           
           <Button 
             className="w-full mb-4" 

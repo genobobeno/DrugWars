@@ -1,135 +1,116 @@
-import { useEffect, useState } from "react";
-import { Card, CardContent } from "../ui/card";
-import { Badge } from "../ui/badge";
+import { useGlobalGameState } from "../../lib/stores/useGlobalGameState";
 import { Progress } from "../ui/progress";
 import { 
   Banknote, 
-  TrendingDown, 
-  TrendingUp, 
+  Landmark, 
   Heart, 
-  Compass, 
-  BadgeDollarSign 
+  Shield,
+  DollarSign 
 } from "lucide-react";
-import { useGlobalGameState } from "../../lib/stores/useGlobalGameState";
+import { useEffect, useState } from "react";
 
 export default function PlayerStats() {
   const { gameState } = useGlobalGameState();
-  const [profitTrend, setProfitTrend] = useState<'up' | 'down' | 'neutral'>('neutral');
+  const [displayImage, setDisplayImage] = useState(""); // Will store image for selected borough
   
+  // Update display image when borough changes
   useEffect(() => {
-    // Calculate profit trend based on last few transactions
-    const recentTransactions = gameState.transactionHistory.slice(-5);
-    
-    if (recentTransactions.length < 2) {
-      setProfitTrend('neutral');
-      return;
-    }
-    
-    const profit = recentTransactions.reduce((total, transaction) => {
-      if (transaction.type === 'sell') {
-        // Add sale value
-        return total + (transaction.price * transaction.quantity);
-      } else {
-        // Subtract purchase cost
-        return total - (transaction.price * transaction.quantity);
+    // In the future, this would use actual images for each borough
+    const getBoroughImage = (boroughId: string) => {
+      switch (boroughId) {
+        case "manhattan":
+          return "Manhattan skyline"; // Placeholder for actual image
+        case "brooklyn":
+          return "Brooklyn Bridge"; // Placeholder for actual image
+        case "bronx":
+          return "Yankee Stadium"; // Placeholder for actual image
+        case "queens":
+          return "Flushing Meadows"; // Placeholder for actual image
+        case "staten_island":
+          return "Staten Island Ferry"; // Placeholder for actual image
+        default:
+          return "New York City skyline"; // Default image
       }
-    }, 0);
+    };
     
-    setProfitTrend(profit > 0 ? 'up' : profit < 0 ? 'down' : 'neutral');
-  }, [gameState.transactionHistory]);
-  
-  // Calculate net worth (cash + inventory value - debt)
-  const inventoryValue = gameState.inventory.reduce((total, item) => {
-    const price = gameState.currentPrices[item.id] || 0;
-    return total + (price * item.quantity);
-  }, 0);
-  
-  const netWorth = gameState.cash + inventoryValue - gameState.debt;
+    if (gameState.currentBorough) {
+      setDisplayImage(getBoroughImage(gameState.currentBorough.id));
+    }
+  }, [gameState.currentBorough]);
   
   // Format values as locale strings
-  const cashFormatted = gameState.cash.toLocaleString();
-  const debtFormatted = gameState.debt.toLocaleString();
-  const inventoryValueFormatted = inventoryValue.toLocaleString();
-  const netWorthFormatted = netWorth.toLocaleString();
+  const cashFormatted = gameState?.cash?.toLocaleString() || "0";
+  const debtFormatted = gameState?.debt?.toLocaleString() || "0";
+  const bankFormatted = gameState?.bank?.toLocaleString() || "0";
   
   return (
-    <Card className="mb-4">
-      <CardContent className="pt-4">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-4">
-          {/* Cash */}
-          <div className="flex flex-col">
-            <div className="flex items-center text-sm text-muted-foreground mb-1">
-              <Banknote className="mr-1 h-4 w-4" />
-              <span>Cash</span>
+    <div className="bg-black text-white rounded-md overflow-hidden mb-4">
+      {/* This would display an actual image of the borough */}
+      <div className="h-32 bg-gray-800 flex items-center justify-center text-center p-4">
+        <p className="text-muted italic">
+          {gameState?.currentBorough 
+            ? `You are in ${gameState.currentBorough.name}` 
+            : "Choose a borough to begin"}
+        </p>
+      </div>
+      
+      {/* Scoreboard */}
+      <div className="p-4">
+        <h3 className="text-sm uppercase tracking-wider mb-3 opacity-70">Player Stats</h3>
+        
+        <div className="grid grid-cols-2 gap-3">
+          {/* Cash - Green */}
+          <div className="flex items-center gap-2">
+            <DollarSign className="h-5 w-5 text-green-500" />
+            <div>
+              <div className="text-xs opacity-70">Cash</div>
+              <div className="font-bold text-green-500">${cashFormatted}</div>
             </div>
-            <div className="text-xl font-semibold">${cashFormatted}</div>
           </div>
           
-          {/* Debt */}
-          <div className="flex flex-col">
-            <div className="flex items-center text-sm text-muted-foreground mb-1">
-              <BadgeDollarSign className="mr-1 h-4 w-4" />
-              <span>Debt</span>
-              <Badge variant="outline" className="ml-1 px-1 py-0 text-xs">
-                {gameState.debtInterestRate}% daily
-              </Badge>
+          {/* Bank - Green */}
+          <div className="flex items-center gap-2">
+            <Landmark className="h-5 w-5 text-green-500" />
+            <div>
+              <div className="text-xs opacity-70">Bank (+{gameState?.bankInterestRate || 5}%)</div>
+              <div className="font-bold text-green-500">${bankFormatted}</div>
             </div>
-            <div className="text-xl font-semibold text-red-500">${debtFormatted}</div>
           </div>
           
-          {/* Health */}
-          <div className="flex flex-col">
-            <div className="flex items-center text-sm text-muted-foreground mb-1">
-              <Heart className="mr-1 h-4 w-4" />
-              <span>Health</span>
+          {/* Debt - Red */}
+          <div className="flex items-center gap-2">
+            <Banknote className="h-5 w-5 text-red-500" />
+            <div>
+              <div className="text-xs opacity-70">Debt (+{gameState?.debtInterestRate || 10}%)</div>
+              <div className="font-bold text-red-500">${debtFormatted}</div>
             </div>
-            <Progress 
-              value={gameState.health} 
-              className="h-4 mt-1"
-              indicatorColor={
-                gameState.health < 25 ? "bg-red-500" : 
-                gameState.health < 50 ? "bg-amber-500" : 
-                "bg-green-500"
-              }
-            />
           </div>
           
-          {/* Current Location */}
-          <div className="flex flex-col">
-            <div className="flex items-center text-sm text-muted-foreground mb-1">
-              <Compass className="mr-1 h-4 w-4" />
-              <span>Location</span>
+          {/* Guns - Yellow */}
+          <div className="flex items-center gap-2">
+            <Shield className="h-5 w-5 text-yellow-500" />
+            <div>
+              <div className="text-xs opacity-70">Guns</div>
+              <div className="font-bold text-yellow-500">{gameState?.guns || 0}</div>
             </div>
-            <div className="font-medium truncate">{gameState.currentBorough?.name || 'Unknown'}</div>
-            {profitTrend !== 'neutral' && (
-              <div className="flex items-center mt-1 text-xs">
-                <span>Profit Trend:</span>
-                {profitTrend === 'up' ? (
-                  <TrendingUp className="ml-1 h-3 w-3 text-green-500" />
-                ) : (
-                  <TrendingDown className="ml-1 h-3 w-3 text-red-500" />
-                )}
-              </div>
-            )}
           </div>
         </div>
         
-        {/* Net Worth Section */}
-        <div className="mt-4 pt-4 border-t">
-          <div className="flex justify-between text-sm">
-            <div className="flex flex-col">
-              <span className="text-muted-foreground">Inventory Value</span>
-              <span className="font-medium">${inventoryValueFormatted}</span>
+        {/* Health Bar */}
+        <div className="mt-4">
+          <div className="flex justify-between text-xs mb-1">
+            <div className="flex items-center">
+              <Heart className="h-4 w-4 mr-1 text-blue-500" />
+              <span>Health</span>
             </div>
-            <div className="flex flex-col items-end">
-              <span className="text-muted-foreground">Net Worth</span>
-              <span className={`font-semibold ${netWorth > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                ${netWorthFormatted}
-              </span>
-            </div>
+            <span>{gameState?.health || 100}%</span>
           </div>
+          <Progress 
+            value={gameState?.health || 100} 
+            className="h-2 bg-gray-700 [&>div]:bg-blue-500"
+          />
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

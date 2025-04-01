@@ -13,9 +13,12 @@ const initialGameState: GameState = {
   totalDays: 30,
   cash: 2000,
   startingCash: 2000,
-  debt: 5000,
-  debtInterestRate: 5,
+  bank: 0,
+  bankInterestRate: 5,
+  debt: 5500,
+  debtInterestRate: 10,
   health: 100,
+  guns: 0,
   maxInventorySpace: 100,
   currentBorough: null,
   boroughs: boroughs,
@@ -41,6 +44,9 @@ interface GameStateStore {
   progressDay: () => void;
   setGameEvent: (event: GameEvent) => void;
   clearGameEvent: () => void;
+  depositToBank: (amount: number) => void;
+  withdrawFromBank: (amount: number) => void;
+  buyGuns: (quantity: number) => void;
 }
 
 // Create Zustand store with all game logic
@@ -264,10 +270,13 @@ export const useGlobalGameState = create<GameStateStore>((set, get) => {
         // Apply debt interest
         const newDebt = gameState.debt * (1 + gameState.debtInterestRate / 100);
         
+        // Apply bank interest
+        const newBank = gameState.bank * (1 + gameState.bankInterestRate / 100);
+        
         // Check if game is over
         const updatedGameState = nextDay > gameState.totalDays
-          ? { ...gameState, phase: 'gameover' as const, debt: newDebt }
-          : { ...gameState, currentDay: nextDay, debt: newDebt };
+          ? { ...gameState, phase: 'gameover' as const, debt: newDebt, bank: newBank }
+          : { ...gameState, currentDay: nextDay, debt: newDebt, bank: newBank };
         
         // Save game state
         setLocalStorage(STORAGE_KEY, updatedGameState);
@@ -359,6 +368,78 @@ export const useGlobalGameState = create<GameStateStore>((set, get) => {
           gameState: updatedGameState,
           currentEvent: null
         };
+      });
+    },
+    
+    // Deposit cash to bank
+    depositToBank: (amount: number) => {
+      set(state => {
+        const { gameState } = state;
+        
+        // Check if player has enough cash
+        if (gameState.cash < amount) {
+          throw new Error("Not enough cash to deposit");
+        }
+        
+        const updatedGameState = {
+          ...gameState,
+          cash: gameState.cash - amount,
+          bank: gameState.bank + amount
+        };
+        
+        // Save game state
+        setLocalStorage(STORAGE_KEY, updatedGameState);
+        
+        return { gameState: updatedGameState };
+      });
+    },
+    
+    // Withdraw from bank to cash
+    withdrawFromBank: (amount: number) => {
+      set(state => {
+        const { gameState } = state;
+        
+        // Check if bank has enough money
+        if (gameState.bank < amount) {
+          throw new Error("Not enough money in the bank");
+        }
+        
+        const updatedGameState = {
+          ...gameState,
+          cash: gameState.cash + amount,
+          bank: gameState.bank - amount
+        };
+        
+        // Save game state
+        setLocalStorage(STORAGE_KEY, updatedGameState);
+        
+        return { gameState: updatedGameState };
+      });
+    },
+    
+    // Buy guns
+    buyGuns: (quantity: number) => {
+      set(state => {
+        const { gameState } = state;
+        
+        // Each gun costs $500
+        const cost = quantity * 500;
+        
+        // Check if player has enough cash
+        if (gameState.cash < cost) {
+          throw new Error("Not enough cash to buy guns");
+        }
+        
+        const updatedGameState = {
+          ...gameState,
+          cash: gameState.cash - cost,
+          guns: gameState.guns + quantity
+        };
+        
+        // Save game state
+        setLocalStorage(STORAGE_KEY, updatedGameState);
+        
+        return { gameState: updatedGameState };
       });
     }
   };

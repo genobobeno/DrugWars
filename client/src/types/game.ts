@@ -73,9 +73,12 @@ export interface GameState {
   totalDays: number;
   cash: number;
   startingCash: number;
+  bank: number;
+  bankInterestRate: number;
   debt: number;
   debtInterestRate: number;
   health: number;
+  guns: number;
   maxInventorySpace: number;
   currentBorough: Borough | null;
   boroughs: Borough[];
