@@ -87,12 +87,21 @@
 
 @layer utilities {
   .animate-fade-in {
-    animation: fadeIn 1s ease-in-out;
+    animation: fadeIn 2s ease-in-out infinite alternate;
   }
 
   @keyframes fadeIn {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  
+  .animate-bounce {
+    animation: bounce 0.7s ease-in-out infinite alternate;
+  }
+  
+  @keyframes bounce {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-15px); }
   }
 }
 

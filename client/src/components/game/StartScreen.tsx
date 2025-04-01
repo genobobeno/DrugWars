@@ -14,7 +14,7 @@ export default function StartScreen() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowIntro(false);
-    }, 2000);
+    }, 5000); // Increased to 5 seconds to better see the animation
     
     return () => clearTimeout(timer);
   }, []);
@@ -22,7 +22,7 @@ export default function StartScreen() {
   if (showIntro) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-black text-white">
-        <div className="text-4xl md:text-6xl font-bold text-center mb-4 animate-pulse">
+        <div className="text-4xl md:text-6xl font-bold text-center mb-8 animate-bounce">
           NYC HUSTLER
         </div>
         <div className="text-xl text-center animate-fade-in">
