@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { fetchGameStatistics, GameStatistics } from '../../lib/api';
 import { Separator } from '../ui/separator';
-import { Loader2 } from 'lucide-react';
+import { Loader2, BarChart3 } from 'lucide-react';
+import { Button } from '../ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+import DetailedGameStats from './DetailedGameStats';
 
 export default function GameStatsFooter() {
   const [stats, setStats] = useState<GameStatistics | null>(null);
@@ -62,6 +65,17 @@ export default function GameStatsFooter() {
               <Separator orientation="vertical" className="h-3 hidden sm:block" />
               <Separator orientation="horizontal" className="w-full h-px block sm:hidden" />
               <span>Last updated: {formatDate(stats.lastUpdated)}</span>
+              
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-5 w-5 p-0 ml-1" aria-label="View detailed statistics">
+                    <BarChart3 className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 p-0">
+                  <DetailedGameStats />
+                </PopoverContent>
+              </Popover>
             </>
           ) : null}
         </div>

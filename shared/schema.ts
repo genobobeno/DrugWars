@@ -27,6 +27,13 @@ export const gameStatistics = pgTable("game_statistics", {
   lastUpdated: timestamp("last_updated").defaultNow().notNull(),
 });
 
+export const games = pgTable("games", {
+  id: serial("id").primaryKey(),
+  completed: boolean("completed").notNull().default(false),
+  dateStarted: timestamp("date_started").defaultNow().notNull(),
+  dateCompleted: timestamp("date_completed"),
+});
+
 export const dailySnapshots = pgTable("daily_snapshots", {
   id: serial("id").primaryKey(),
   gameId: integer("game_id").notNull(),
@@ -63,6 +70,11 @@ export const insertDailySnapshotSchema = createInsertSchema(dailySnapshots).pick
   netWorth: true,
 });
 
+// Create game schema
+export const insertGameSchema = createInsertSchema(games).pick({
+  completed: true,
+});
+
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -71,3 +83,5 @@ export type InsertHighScore = z.infer<typeof insertHighScoreSchema>;
 export type GameStatistics = typeof gameStatistics.$inferSelect;
 export type DailySnapshot = typeof dailySnapshots.$inferSelect;
 export type InsertDailySnapshot = z.infer<typeof insertDailySnapshotSchema>;
+export type Game = typeof games.$inferSelect;
+export type InsertGame = z.infer<typeof insertGameSchema>;

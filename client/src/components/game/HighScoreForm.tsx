@@ -8,6 +8,7 @@ import { Transaction, GameState } from '../../types/game';
 import { Check, Crown, X, AlertTriangle } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { Separator } from '../ui/separator';
+import { useGame } from '../../lib/stores/useGame';
 
 interface HighScoreFormProps {
   gameState: GameState;
@@ -20,6 +21,7 @@ export default function HighScoreForm({ gameState, onSubmitted, onCancel }: High
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const { currentGameId } = useGame();
   
   // Calculate final score (cash + bank - debt)
   const finalScore = gameState.cash + gameState.bank - gameState.debt;
@@ -96,7 +98,8 @@ export default function HighScoreForm({ gameState, onSubmitted, onCancel }: High
         debt: gameState.debt,
         dayCompleted: gameState.currentDay,
         transactionHistory: gameState.transactionHistory,
-        dailySnapshots: snapshots
+        dailySnapshots: snapshots,
+        gameId: currentGameId || undefined
       });
       
       setSubmitted(true);

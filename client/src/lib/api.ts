@@ -22,6 +22,19 @@ export interface GameStatistics {
   lastUpdated: string;
 }
 
+export interface DetailedGameStatistics {
+  totalGames: number;
+  completedGames: number;
+  uncompletedGames: number;
+  completionRate: number;
+  lastUpdated: string;
+}
+
+export interface GameStartResponse {
+  success: boolean;
+  gameId: number;
+}
+
 export interface DailySnapshot {
   day: number;
   cash: number;
@@ -61,6 +74,7 @@ export async function submitHighScore(data: {
   dayCompleted: number;
   transactionHistory: any[];
   dailySnapshots: DailySnapshot[];
+  gameId?: number;
 }): Promise<ScoreSubmissionResponse> {
   return await apiRequest<ScoreSubmissionResponse>('/api/highscores', {
     method: 'POST',
@@ -79,9 +93,16 @@ export async function fetchGameStatistics(): Promise<GameStatistics> {
   });
 }
 
-export async function recordGameStarted(): Promise<SuccessResponse> {
-  return await apiRequest<SuccessResponse>('/api/statistics/game-started', {
+export async function recordGameStarted(): Promise<GameStartResponse> {
+  return await apiRequest<GameStartResponse>('/api/statistics/game-started', {
     method: 'POST',
+    on401: 'throw',
+  });
+}
+
+export async function fetchDetailedGameStatistics(): Promise<DetailedGameStatistics> {
+  return await apiRequest<DetailedGameStatistics>('/api/statistics/detailed', {
+    method: 'GET',
     on401: 'throw',
   });
 }
