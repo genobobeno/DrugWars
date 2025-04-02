@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
 import { Slider } from "../ui/slider";
 import { Badge } from "../ui/badge";
-import { ShoppingCart, Banknote, AlertCircle, BadgeInfo, Search, AlertTriangle, TrendingUp } from "lucide-react";
+import { ShoppingCart, Banknote, AlertCircle, BadgeInfo, AlertTriangle, TrendingUp } from "lucide-react";
 import { useGlobalGameState } from "../../lib/stores/useGlobalGameState";
 import { useAudio } from "../../lib/stores/useAudio";
 import { isDrugAvailable, getDrugEventDescription } from "../../lib/priceGenerator";
@@ -28,7 +27,6 @@ interface MarketPlaceProps {
 export default function MarketPlace({ selectedItemToSell, clearSelectedItem }: MarketPlaceProps) {
   const { gameState, buyItem, sellItem } = useGlobalGameState();
   const { playHit, playSuccess } = useAudio();
-  const [searchQuery, setSearchQuery] = useState("");
   const [selectedItem, setSelectedItem] = useState<MarketItem | null>(null);
   const [selectedInventoryItem, setSelectedInventoryItem] = useState<InventoryItem | null>(null);
   const [quantity, setQuantity] = useState<number>(1);
@@ -64,12 +62,6 @@ export default function MarketPlace({ selectedItemToSell, clearSelectedItem }: M
   // Filter available drugs
   const availableDrugs = gameState.items.filter(item => 
     isDrugAvailable(item.id, gameState.currentPrices)
-  );
-  
-  // Filter items based on search query
-  const filteredItems = availableDrugs.filter(item => 
-    item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
   
   // Handle item selection for buying
@@ -179,16 +171,6 @@ export default function MarketPlace({ selectedItemToSell, clearSelectedItem }: M
               <Banknote className="mr-1 h-4 w-4" />
               {gameState.currentBorough?.name} Drug Market
             </CardTitle>
-            
-            <div className="relative w-36 md:w-48">
-              <Search className="absolute left-2 top-1.5 h-3 w-3 text-muted-foreground" />
-              <Input 
-                placeholder="Search..." 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-7 h-7 text-xs"
-              />
-            </div>
           </div>
         </CardHeader>
         <CardContent className="py-0">
@@ -198,13 +180,11 @@ export default function MarketPlace({ selectedItemToSell, clearSelectedItem }: M
                 <tr>
                   <th className="text-left py-1 font-medium text-xs">Drug</th>
                   <th className="text-right py-1 font-medium text-xs">Price</th>
-                  <th className="text-right py-1 font-medium text-xs w-16">Buy</th>
+                  <th className="text-right py-1 font-medium text-xs w-16">Transact</th>
                 </tr>
               </thead>
               <tbody className="text-xs">
-                {availableDrugs
-                  .filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()))
-                  .map((item) => {
+                {availableDrugs.map((item) => {
                   const price = gameState.currentPrices[item.id] || 0;
                   const inventoryItem = gameState.inventory.find(i => i.id === item.id);
                   const inInventory = inventoryItem && inventoryItem.quantity > 0;
