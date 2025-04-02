@@ -41,17 +41,17 @@ export default function BoroughSelector({
         </div>
       )}
 
-      <div className="relative h-[400px] w-full overflow-hidden">
+      <div className="relative h-[350px] w-full overflow-hidden">
         {/* Background Map Image - Using user-provided NYBoroughs.webp */}
         <img
           src="/images/NYBoroughs.webp"
           alt="NYC Map"
-          className="w-full h-full object-contain bg-gray-900"
+          className="w-full h-full object-cover bg-gray-900"
         />
 
         {/* Interactive Overlays */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <svg viewBox="0 0 500 500" className="w-full h-full overlay">
+          <svg viewBox="0 0 500 500" className="w-[90%] h-full mx-auto overlay">
             {/* Staten Island Clickable Area */}
             <polygon
               points="50,400 15,450 5,490 125,430 175,380 155,325 80,335 60,330"
