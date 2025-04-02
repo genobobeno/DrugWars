@@ -187,7 +187,7 @@ export default function BoroughSelector({
         {/* Instruction overlay with day advancement info */}
         <div className="absolute bottom-2 right-2 px-3 py-1 bg-black/75 text-white rounded text-xs flex items-center">
           <CalendarDays className="h-3 w-3 mr-1" />
-          Travel to a borough advances the day (+1)
+          Travel to a new borough advances the day (+1) and may trigger events
           <ArrowRight className="h-3 w-3 ml-1" />
         </div>
       </div>

@@ -42,59 +42,29 @@ export default function MainGame() {
     // Set new borough
     setCurrentBorough(borough);
     
-    // Check for random event on travel (20% chance)
-    if (Math.random() < 0.2) {
-      const event = getRandomEvent('travel', gameState);
-      if (event) {
-        setGameEvent(event);
+    // Check for travel event first (30% chance)
+    if (Math.random() < 0.3) {
+      const travelEvent = getRandomEvent('travel', gameState);
+      if (travelEvent) {
+        setGameEvent(travelEvent);
         return;
       }
     }
     
-    // Update prices and progress to next day when traveling
-    updatePrices();
-    progressDay();
-    playSuccess();
-  };
-  
-  // Handle ending the day
-  const handleEndDay = () => {
-    playSuccess();
-    
-    // Track if we've seen gun or police event already today
-    const hasGunEventToday = gameState.eventHistory.some(event => 
-      event.type === 'gun' && event.day === gameState.currentDay
-    );
-    
-    const hasPoliceEventToday = gameState.eventHistory.some(event => 
-      event.type === 'police_encounter' && event.day === gameState.currentDay
-    );
-    
-    // Check for random events on end of day (30% chance)
-    if (Math.random() < 0.3) {
-      const event = getRandomEvent('daily', gameState);
-      
-      // Only process the event if:
-      // 1. It's not a gun event when we already had a police event today
-      // 2. It's not a police encounter when we already had a gun event today
-      const shouldSkipEvent = 
-        (event?.type === 'gun' && hasPoliceEventToday) ||
-        (event?.type === 'police_encounter' && hasGunEventToday);
-      
-      if (event && !shouldSkipEvent) {
-        // Tag the event with the current day for tracking
-        const eventWithDay = {
-          ...event,
-          day: gameState.currentDay
-        };
-        setGameEvent(eventWithDay);
-        return; // Wait for event to be closed before progressing
+    // If no travel event, check for a daily random event (40% chance)
+    // This includes trenchcoat offers, gun offers, police encounters, etc.
+    if (Math.random() < 0.4) {
+      const dailyEvent = getRandomEvent('daily', gameState);
+      if (dailyEvent) {
+        setGameEvent(dailyEvent);
+        return;
       }
     }
     
-    // Update prices and progress to next day
+    // If no events triggered, just update prices and progress to next day
     updatePrices();
     progressDay();
+    playSuccess();
   };
   
   // Handle selling an item
@@ -177,18 +147,6 @@ export default function MainGame() {
             selectedItemToSell={selectedItemToSell} 
             clearSelectedItem={() => setSelectedItemToSell(null)} 
           />
-          
-          {/* End Day Button */}
-          <div className="mt-3 mb-2 flex justify-end">
-            <Button 
-              onClick={handleEndDay}
-              className="flex items-center gap-2"
-            >
-              <CalendarDays className="h-4 w-4" />
-              End Day
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </div>
         </div>
         
         {/* Inventory and Banking - Fixed 350px width */}
