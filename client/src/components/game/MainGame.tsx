@@ -96,13 +96,11 @@ export default function MainGame() {
         localStorage.setItem("nyc-hustler-game-state", JSON.stringify(updatedGameState));
       }
       
-      // If this is a daily random event (like police encounter or gun offer),
-      // progress the day after handling the event
-      if (currentEvent.category === 'daily') {
-        // Update prices and progress to next day
-        updatePrices();
-        progressDay();
-      }
+      // Always progress the day after handling ANY event (travel or daily)
+      // This ensures that all travel and all daily events lead to day advancement
+      updatePrices();
+      progressDay();
+      playSuccess();
     }
     
     // Clear the current event
