@@ -230,6 +230,21 @@ const trenchcoatEvents: GameEvent[] = [
   }
 ];
 
+// Gun events - special events to buy guns for protection
+const gunEvents: GameEvent[] = [
+  {
+    id: "gun_offer",
+    type: "gun",
+    category: "daily",
+    title: "Street Weapons Dealer",
+    description: "A weapons dealer approaches you offering protection for the streets.",
+    effect: "neutral",
+    probability: 0.12, // 12% chance of occurring
+    // A dynamically calculated price and gun type will be applied when the event is triggered
+    // This will be handled in the event display component
+  }
+];
+
 // Combine all events
 const allEvents = [
   ...policeEvents,
@@ -238,7 +253,8 @@ const allEvents = [
   ...inventoryEvents,
   ...debtEvents,
   ...cashEvents,
-  ...trenchcoatEvents
+  ...trenchcoatEvents,
+  ...gunEvents
 ];
 
 // Get a random event based on category

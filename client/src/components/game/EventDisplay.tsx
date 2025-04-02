@@ -10,7 +10,8 @@ import {
   PanelBottom, 
   Shield, 
   ShieldAlert,
-  Shirt
+  Shirt,
+  Zap
 } from "lucide-react";
 import { 
   AlertDialog, 
@@ -35,6 +36,7 @@ const eventIcons: Record<string, LucideIcon> = {
   "debt": BadgeAlert,
   "cash": Medal,
   "trenchcoat": Shirt,
+  "gun": Zap,
   "neutral": AlertCircle,
   "beneficial": Shield,
   "harmful": PanelBottom
@@ -58,6 +60,19 @@ export default function EventDisplay({ onClose }: EventDisplayProps) {
   // Generate a random inventory space increase between 10 and 35
   const spaceIncrease = useMemo(() => {
     return Math.floor(Math.random() * 26) + 10; // 10 to 35
+  }, [currentEvent?.id]);
+  
+  // Generate a random price for gun between $250 and $750
+  const gunPrice = useMemo(() => {
+    return Math.floor(Math.random() * 501) + 250; // 250 to 750
+  }, [currentEvent?.id]);
+  
+  // List of gun types to choose from
+  const gunTypes = ["revolver", "beretta", "glock", "uzi"];
+  
+  // Select a random gun type
+  const gunType = useMemo(() => {
+    return gunTypes[Math.floor(Math.random() * gunTypes.length)];
   }, [currentEvent?.id]);
   
   useEffect(() => {
@@ -96,7 +111,28 @@ export default function EventDisplay({ onClose }: EventDisplayProps) {
         setGameEvent(updatedEvent);
       }
     }
-  }, [currentEvent, playHit, playSuccess, trenchcoatPrice, spaceIncrease, setGameEvent]);
+    
+    // If this is a gun offer event, add gun type and price to the description
+    if (currentEvent.type === "gun" && currentEvent.id === "gun_offer") {
+      if (!currentEvent.effects) {
+        const capitalizedGunType = gunType.charAt(0).toUpperCase() + gunType.slice(1);
+        const updatedEvent = {
+          ...currentEvent,
+          title: `${capitalizedGunType} Offer`,
+          description: `A weapons dealer offers you a ${gunType} for $${gunPrice}. This will help protect you on the streets.`,
+          effects: [
+            { type: 'cash' as const, value: -gunPrice },
+            { type: 'guns' as const, value: 1 }
+          ],
+          impactSummary: [
+            `-$${gunPrice} cash`,
+            "+1 gun for protection"
+          ]
+        };
+        setGameEvent(updatedEvent);
+      }
+    }
+  }, [currentEvent, playHit, playSuccess, trenchcoatPrice, spaceIncrease, gunPrice, gunType, setGameEvent]);
   
   // If no event, don't render
   if (!currentEvent) {
@@ -108,8 +144,14 @@ export default function EventDisplay({ onClose }: EventDisplayProps) {
   // Determine if this is a trenchcoat offer event
   const isTrenchcoatOffer = currentEvent.type === "trenchcoat" && currentEvent.id === "trenchcoat_offer";
   
+  // Determine if this is a gun offer event
+  const isGunOffer = currentEvent.type === "gun" && currentEvent.id === "gun_offer";
+  
   // Check if player can afford the trenchcoat
   const canAffordTrenchcoat = isTrenchcoatOffer && gameState.cash >= trenchcoatPrice;
+  
+  // Check if player can afford the gun
+  const canAffordGun = isGunOffer && gameState.cash >= gunPrice;
   
   const handleTrenchcoatPurchase = () => {
     if (isTrenchcoatOffer && canAffordTrenchcoat && currentEvent?.effects) {
@@ -134,6 +176,31 @@ export default function EventDisplay({ onClose }: EventDisplayProps) {
       }
       
       playSuccess();
+    }
+    onClose();
+  };
+  
+  const handleGunPurchase = () => {
+    if (isGunOffer && canAffordGun && currentEvent?.effects) {
+      try {
+        // Use the global buyGuns function with dynamic price
+        const { buyGuns } = useGlobalGameState.getState();
+        buyGuns(1, gunPrice);
+        
+        // Add this event to event history if needed
+        const { gameState } = useGlobalGameState.getState();
+        if (!gameState.eventHistory.some(event => event.id === currentEvent.id)) {
+          const updatedHistory = [...gameState.eventHistory, currentEvent];
+          setLocalStorage("nyc-hustler-game-state", {
+            ...gameState,
+            eventHistory: updatedHistory
+          });
+        }
+        
+        playSuccess();
+      } catch (error) {
+        console.error("Failed to purchase gun:", error);
+      }
     }
     onClose();
   };
@@ -182,6 +249,21 @@ export default function EventDisplay({ onClose }: EventDisplayProps) {
                 disabled={!canAffordTrenchcoat}
               >
                 {canAffordTrenchcoat ? `Buy for $${trenchcoatPrice}` : "Can't Afford"}
+              </Button>
+            </>
+          ) : isGunOffer ? (
+            <>
+              <Button 
+                variant="outline" 
+                onClick={onClose}
+              >
+                Decline
+              </Button>
+              <Button 
+                onClick={handleGunPurchase}
+                disabled={!canAffordGun}
+              >
+                {canAffordGun ? `Buy for $${gunPrice}` : "Can't Afford"}
               </Button>
             </>
           ) : (

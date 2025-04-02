@@ -47,7 +47,7 @@ interface GameStateStore {
   depositToBank: (amount: number) => void;
   withdrawFromBank: (amount: number) => void;
   payDebt: (amount: number) => void;
-  buyGuns: (quantity: number) => void;
+  buyGuns: (quantity: number, pricePerGun?: number) => void;
 }
 
 // Create Zustand store with all game logic
@@ -361,6 +361,10 @@ export const useGlobalGameState = create<GameStateStore>((set, get) => {
                 // Add to max inventory space
                 updatedState.maxInventorySpace += effect.value;
                 break;
+              case 'guns':
+                // Add or remove guns
+                updatedState.guns = Math.max(0, updatedState.guns + effect.value);
+                break;
               case 'inventory':
                 // Remove random items if effect is negative
                 if (effect.value < 0 && updatedState.inventory.length > 0) {
@@ -504,12 +508,13 @@ export const useGlobalGameState = create<GameStateStore>((set, get) => {
     },
     
     // Buy guns
-    buyGuns: (quantity: number) => {
+    buyGuns: (quantity: number, pricePerGun?: number) => {
       set(state => {
         const { gameState } = state;
         
-        // Each gun costs $500
-        const cost = quantity * 500;
+        // Default price is $500 if not specified
+        const unitPrice = pricePerGun || 500;
+        const cost = quantity * unitPrice;
         
         // Check if player has enough cash
         if (gameState.cash < cost) {

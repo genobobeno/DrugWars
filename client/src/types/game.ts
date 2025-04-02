@@ -58,7 +58,7 @@ export interface BoroughVisit {
 
 // Game event effect
 export interface EventEffect {
-  type: 'cash' | 'debt' | 'health' | 'inventory' | 'maxInventorySpace';
+  type: 'cash' | 'debt' | 'health' | 'inventory' | 'maxInventorySpace' | 'guns';
   value: number;
 }
 

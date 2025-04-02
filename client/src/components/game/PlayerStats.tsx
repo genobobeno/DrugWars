@@ -5,6 +5,7 @@ import {
   Landmark, 
   Heart, 
   Shield,
+  Zap,
   DollarSign 
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -94,7 +95,7 @@ export default function PlayerStats({ headerHidden = false }: PlayerStatsProps) 
           
           {/* Guns - Yellow */}
           <div className="flex items-center gap-2">
-            <Shield className="h-5 w-5 text-yellow-500" />
+            <Zap className="h-5 w-5 text-yellow-500" />
             <div>
               <div className="text-xs opacity-70">Guns</div>
               <div className="font-bold text-yellow-500">{gameState?.guns || 0}</div>
