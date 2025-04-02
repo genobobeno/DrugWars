@@ -158,8 +158,11 @@ export default function GameOver() {
           
           <HighScoreTable />
           
-          <div className="mt-6">
-            <GameProgressChart snapshots={snapshots} />
+          <div className="mt-6 border rounded-lg p-4 bg-card">
+            <h3 className="font-medium mb-3">Wealth Progression</h3>
+            <div className="h-[180px] w-full">
+              <GameProgressChart snapshots={snapshots} />
+            </div>
           </div>
           
           <div className="mt-6 text-center">
@@ -318,8 +321,11 @@ export default function GameOver() {
             </div>
             
             {/* Game progress chart below buttons */}
-            <div className="h-[120px] mt-4">
-              <GameProgressChart snapshots={snapshots} />
+            <div className="mt-6 border-t pt-4">
+              <h3 className="font-medium mb-3">Wealth Progression</h3>
+              <div className="h-[180px] w-full">
+                <GameProgressChart snapshots={snapshots} />
+              </div>
             </div>
           </CardFooter>
         </Card>
