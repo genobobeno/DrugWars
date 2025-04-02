@@ -215,6 +215,21 @@ const cashEvents: GameEvent[] = [
   }
 ];
 
+// Trenchcoat events - special events to expand inventory capacity
+const trenchcoatEvents: GameEvent[] = [
+  {
+    id: "trenchcoat_offer",
+    type: "trenchcoat",
+    category: "daily",
+    title: "Trenchcoat Upgrade",
+    description: "A shady vendor offers you a larger trenchcoat with more pockets. It will increase your inventory capacity by 25 slots.",
+    effect: "positive",
+    probability: 0.09, // 9% chance of occurring
+    // A dynamically calculated price will be applied when the event is triggered
+    // This will be handled in the event display component
+  }
+];
+
 // Combine all events
 const allEvents = [
   ...policeEvents,
@@ -222,7 +237,8 @@ const allEvents = [
   ...healthEvents, 
   ...inventoryEvents,
   ...debtEvents,
-  ...cashEvents
+  ...cashEvents,
+  ...trenchcoatEvents
 ];
 
 // Get a random event based on category

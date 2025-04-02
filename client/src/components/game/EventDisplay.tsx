@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { 
   AlertCircle, 
   BadgeAlert, 
@@ -9,7 +9,8 @@ import {
   Package, 
   PanelBottom, 
   Shield, 
-  ShieldAlert 
+  ShieldAlert,
+  Shirt
 } from "lucide-react";
 import { 
   AlertDialog, 
@@ -23,6 +24,7 @@ import { Button } from "../ui/button";
 import { useGlobalGameState } from "../../lib/stores/useGlobalGameState";
 import { GameEvent } from "../../types/game";
 import { useAudio } from "../../lib/stores/useAudio";
+import { setLocalStorage } from "../../lib/utils";
 
 // Icon mapping for event types
 const eventIcons: Record<string, LucideIcon> = {
@@ -32,6 +34,7 @@ const eventIcons: Record<string, LucideIcon> = {
   "inventory": Package,
   "debt": BadgeAlert,
   "cash": Medal,
+  "trenchcoat": Shirt,
   "neutral": AlertCircle,
   "beneficial": Shield,
   "harmful": PanelBottom
@@ -42,10 +45,15 @@ interface EventDisplayProps {
 }
 
 export default function EventDisplay({ onClose }: EventDisplayProps) {
-  const { gameState, currentEvent } = useGlobalGameState();
+  const { gameState, currentEvent, setGameEvent } = useGlobalGameState();
   const { playHit, playSuccess } = useAudio();
   const [icon, setIcon] = useState<LucideIcon>(AlertCircle);
   const [iconColor, setIconColor] = useState("text-amber-500");
+  
+  // Generate a random price for trenchcoat between $100 and $300
+  const trenchcoatPrice = useMemo(() => {
+    return Math.floor(Math.random() * 201) + 100; // 100 to 300
+  }, [currentEvent?.id]);
   
   useEffect(() => {
     if (!currentEvent) return;
@@ -63,7 +71,27 @@ export default function EventDisplay({ onClose }: EventDisplayProps) {
     } else {
       setIconColor("text-amber-500");
     }
-  }, [currentEvent, playHit, playSuccess]);
+    
+    // If this is a trenchcoat event, add the price to the description
+    if (currentEvent.type === "trenchcoat" && currentEvent.id === "trenchcoat_offer") {
+      // Add effects with dynamic price if not already added
+      if (!currentEvent.effects) {
+        const updatedEvent = {
+          ...currentEvent,
+          description: `A shady vendor offers you a larger trenchcoat with more pockets for $${trenchcoatPrice}. It will increase your inventory capacity by 25 slots.`,
+          effects: [
+            { type: 'cash' as const, value: -trenchcoatPrice },
+            { type: 'maxInventorySpace' as const, value: 25 }
+          ],
+          impactSummary: [
+            `-$${trenchcoatPrice} cash`,
+            "+25 inventory capacity"
+          ]
+        };
+        setGameEvent(updatedEvent);
+      }
+    }
+  }, [currentEvent, playHit, playSuccess, trenchcoatPrice, setGameEvent]);
   
   // If no event, don't render
   if (!currentEvent) {
@@ -71,6 +99,39 @@ export default function EventDisplay({ onClose }: EventDisplayProps) {
   }
   
   const IconComponent = icon;
+  
+  // Determine if this is a trenchcoat offer event
+  const isTrenchcoatOffer = currentEvent.type === "trenchcoat" && currentEvent.id === "trenchcoat_offer";
+  
+  // Check if player can afford the trenchcoat
+  const canAffordTrenchcoat = isTrenchcoatOffer && gameState.cash >= trenchcoatPrice;
+  
+  const handleTrenchcoatPurchase = () => {
+    if (isTrenchcoatOffer && canAffordTrenchcoat && currentEvent?.effects) {
+      // Apply all effects from the event
+      const updatedGameState = { ...gameState };
+      
+      currentEvent.effects.forEach(effect => {
+        if (effect.type === 'cash') {
+          updatedGameState.cash = Math.max(0, updatedGameState.cash + effect.value);
+        } else if (effect.type === 'maxInventorySpace') {
+          updatedGameState.maxInventorySpace += effect.value;
+        }
+        // Other effect types are handled by the global event system
+      });
+      
+      // Update game state
+      setLocalStorage("nyc-hustler-game-state", updatedGameState);
+      
+      // Add this event to event history if needed
+      if (!gameState.eventHistory.some(event => event.id === currentEvent.id)) {
+        updatedGameState.eventHistory = [...updatedGameState.eventHistory, currentEvent];
+      }
+      
+      playSuccess();
+    }
+    onClose();
+  };
   
   return (
     <AlertDialog open={!!currentEvent} onOpenChange={(open) => !open && onClose()}>
@@ -103,9 +164,26 @@ export default function EventDisplay({ onClose }: EventDisplayProps) {
         </AlertDialogHeader>
         
         <AlertDialogFooter>
-          <Button onClick={onClose}>
-            Continue
-          </Button>
+          {isTrenchcoatOffer ? (
+            <>
+              <Button 
+                variant="outline" 
+                onClick={onClose}
+              >
+                Decline
+              </Button>
+              <Button 
+                onClick={handleTrenchcoatPurchase}
+                disabled={!canAffordTrenchcoat}
+              >
+                {canAffordTrenchcoat ? `Buy for $${trenchcoatPrice}` : "Can't Afford"}
+              </Button>
+            </>
+          ) : (
+            <Button onClick={onClose}>
+              Continue
+            </Button>
+          )}
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

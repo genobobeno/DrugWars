@@ -357,6 +357,10 @@ export const useGlobalGameState = create<GameStateStore>((set, get) => {
               case 'health':
                 updatedState.health = Math.min(100, Math.max(0, updatedState.health + effect.value));
                 break;
+              case 'maxInventorySpace':
+                // Add to max inventory space
+                updatedState.maxInventorySpace += effect.value;
+                break;
               case 'inventory':
                 // Remove random items if effect is negative
                 if (effect.value < 0 && updatedState.inventory.length > 0) {
