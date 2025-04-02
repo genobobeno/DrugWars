@@ -142,17 +142,57 @@ const healthEvents: GameEvent[] = [
 // Inventory events
 const inventoryEvents: GameEvent[] = [
   {
-    id: "inventory_theft",
+    id: "inventory_police_escape",
+    type: "inventory",
+    category: "travel",
+    title: "Police Pursuit",
+    description: "You had to drop some drugs while running from the police!",
+    effect: "negative",
+    probability: 0.07,
+    effects: [
+      { type: "inventory", value: -1 } // Special value: will be calculated as 15-30% in component
+    ],
+    impactSummary: ["Lost 15-30% of your inventory"]
+  },
+  {
+    id: "inventory_robbed",
     type: "inventory",
     category: "daily",
-    title: "Stolen Goods",
-    description: "Someone broke into your storage and stole some of your inventory!",
+    title: "Robbed by Thugs",
+    description: "A gang of thugs cornered you in an alley and stole some of your drugs!",
     effect: "negative",
-    probability: 0.1,
+    probability: 0.06,
     effects: [
-      { type: "inventory", value: -15 }
+      { type: "inventory", value: -1 } // Special value: will be calculated as 15-30% in component
     ],
-    impactSummary: ["Lost some inventory items"]
+    impactSummary: ["Lost 15-30% of your inventory"]
+  },
+  {
+    id: "inventory_conned",
+    type: "inventory",
+    category: "daily", 
+    title: "Dealer Con",
+    description: "Another dealer tricked you in a deal and threatened violence when you objected.",
+    effect: "negative",
+    probability: 0.05,
+    effects: [
+      { type: "inventory", value: -1 } // Special value: will be calculated as 10-25% in component
+    ],
+    impactSummary: ["Lost 10-25% of your inventory"]
+  },
+  {
+    id: "inventory_donation",
+    type: "inventory",
+    category: "travel",
+    title: "Act of Kindness",
+    description: "You met someone suffering from severe withdrawal. You felt compassion and donated some of your drugs.",
+    effect: "negative",
+    probability: 0.04,
+    effects: [
+      { type: "inventory", value: -1 } // Special value: will be calculated as 5-10% in component
+      // Could add some small health or karma boost in the future
+    ],
+    impactSummary: ["Donated 5-10% of your inventory"]
   },
   {
     id: "inventory_bonus",
@@ -209,11 +249,24 @@ const cashEvents: GameEvent[] = [
     title: "Lost Wallet",
     description: "You lost your wallet while traveling. You lost some of your cash.",
     effect: "negative",
-    probability: 0.08,
+    probability: 0.07,
     effects: [
       { type: "cash", value: -1 } // Will be calculated as a percentage in EventDisplay
     ],
     impactSummary: ["Lost 15-25% of your cash"]
+  },
+  {
+    id: "cash_mugged",
+    type: "cash",
+    category: "travel",
+    title: "Mugged",
+    description: "You were mugged at knifepoint in a dark alley. You lost some of your cash.",
+    effect: "negative",
+    probability: 0.05,
+    effects: [
+      { type: "cash", value: -1 } // Will be calculated as a percentage (20-40%) in the component
+    ],
+    impactSummary: ["Lost 20-40% of your cash"]
   },
   {
     id: "cash_gambling_win",
@@ -227,6 +280,19 @@ const cashEvents: GameEvent[] = [
       { type: "cash", value: 500 }
     ],
     impactSummary: ["+$500 cash"]
+  },
+  {
+    id: "cash_street_deal",
+    type: "cash",
+    category: "daily",
+    title: "Lucky Street Deal",
+    description: "You made a quick deal with a desperate buyer on the street, making a nice profit.",
+    effect: "positive",
+    probability: 0.06,
+    effects: [
+      { type: "cash", value: 300 }
+    ],
+    impactSummary: ["+$300 cash"]
   }
 ];
 
@@ -283,6 +349,7 @@ export function getRandomEvent(category: EventCategory, gameState: GameState): G
   }
   
   // Filter out events that require cash if player doesn't have any
+  // or inventory events if player has no inventory
   eligibleEvents = eligibleEvents.filter(event => {
     // Check if event has cash effects that deduct money
     if (event.effects) {
@@ -296,6 +363,15 @@ export function getRandomEvent(category: EventCategory, gameState: GameState): G
           // For police_bribe, debt_collector, etc. we'll set a minimum of having at least $50
           return gameState.cash >= Math.min(50, Math.abs(cashEffect.value));
         }
+      }
+
+      // Check if event involves losing inventory but player has none
+      const inventoryEffect = event.effects.find(effect => effect.type === 'inventory' && effect.value < 0);
+      if (inventoryEffect && event.id.startsWith('inventory_') && 
+          (gameState.inventory.length === 0 || 
+           gameState.inventory.reduce((sum, item) => sum + item.quantity, 0) === 0)) {
+        // Skip inventory loss events if player has no inventory
+        return false;
       }
     }
     

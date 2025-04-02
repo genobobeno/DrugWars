@@ -373,6 +373,15 @@ export const useGlobalGameState = create<GameStateStore>((set, get) => {
                       event.description = `You lost your wallet while traveling. You lost $${deductionAmount} (${percentage}% of your cash).`;
                       event.impactSummary = [`-$${deductionAmount} cash (${percentage}%)`];
                     }
+                    // For mugged: 20-40% of cash
+                    else if (event.id === "cash_mugged") {
+                      const percentage = 20 + Math.floor(Math.random() * 21); // 20-40%
+                      deductionAmount = Math.floor(updatedState.cash * percentage / 100);
+                      
+                      // Update the event description with the actual amount
+                      event.description = `You were mugged at knifepoint in a dark alley. They took $${deductionAmount} (${percentage}% of your cash).`;
+                      event.impactSummary = [`-$${deductionAmount} cash (${percentage}%)`];
+                    }
                   } 
                   // For fixed amount events like police bribes, debt collectors, cap at available cash
                   else if (event.id === "police_bribe" || event.id === "debt_collector") {
@@ -411,30 +420,81 @@ export const useGlobalGameState = create<GameStateStore>((set, get) => {
                 updatedState.guns = Math.max(0, updatedState.guns + effect.value);
                 break;
               case 'inventory':
-                // Remove random items if effect is negative
+                // Remove inventory items if effect is negative
                 if (effect.value < 0 && updatedState.inventory.length > 0) {
-                  const totalItems = updatedState.inventory.reduce((sum, item) => sum + item.quantity, 0);
-                  const itemsToRemove = Math.min(Math.abs(effect.value), totalItems);
-                  
-                  if (itemsToRemove > 0) {
-                    // Choose a random item to remove from
-                    const itemIndex = Math.floor(Math.random() * updatedState.inventory.length);
-                    const item = updatedState.inventory[itemIndex];
+                  // Special case: value is -1 means percentage-based reduction
+                  if (effect.value === -1) {
+                    let percentageLoss = 0;
+                    let lossDescription = "";
                     
-                    // Remove items
-                    const newQuantity = item.quantity - itemsToRemove;
+                    // Determine percentage based on event type
+                    switch (event.id) {
+                      case "inventory_police_escape":
+                      case "inventory_robbed":
+                        percentageLoss = 15 + Math.floor(Math.random() * 16); // 15-30%
+                        lossDescription = `Lost ${percentageLoss}% of your inventory`;
+                        break;
+                      case "inventory_conned":
+                        percentageLoss = 10 + Math.floor(Math.random() * 16); // 10-25%
+                        lossDescription = `Lost ${percentageLoss}% of your inventory`;
+                        break;
+                      case "inventory_donation":
+                        percentageLoss = 5 + Math.floor(Math.random() * 6); // 5-10%
+                        lossDescription = `Donated ${percentageLoss}% of your inventory`;
+                        break;
+                      default:
+                        percentageLoss = 10 + Math.floor(Math.random() * 11); // 10-20% fallback
+                        lossDescription = `Lost ${percentageLoss}% of your inventory`;
+                    }
                     
-                    if (newQuantity <= 0) {
-                      // Remove item completely
-                      updatedState.inventory = updatedState.inventory.filter((_, idx) => idx !== itemIndex);
-                    } else {
-                      // Reduce quantity
-                      updatedState.inventory = updatedState.inventory.map((item, idx) => {
-                        if (idx === itemIndex) {
-                          return { ...item, quantity: newQuantity };
-                        }
-                        return item;
-                      });
+                    // Update event description and summary with percentage
+                    if (event.id === "inventory_police_escape") {
+                      event.description = `You had to drop ${percentageLoss}% of your drugs while running from the police!`;
+                    } else if (event.id === "inventory_robbed") {
+                      event.description = `A gang of thugs cornered you in an alley and stole ${percentageLoss}% of your drugs!`;
+                    } else if (event.id === "inventory_conned") {
+                      event.description = `Another dealer tricked you in a deal and threatened violence, taking ${percentageLoss}% of your inventory.`;
+                    } else if (event.id === "inventory_donation") {
+                      event.description = `You met someone suffering from severe withdrawal. You felt compassion and donated ${percentageLoss}% of your drugs.`;
+                    }
+                    
+                    event.impactSummary = [lossDescription];
+                    
+                    // Process each inventory item to reduce by percentage
+                    updatedState.inventory = updatedState.inventory.map(item => {
+                      const lossAmount = Math.floor(item.quantity * percentageLoss / 100);
+                      return {
+                        ...item,
+                        quantity: Math.max(0, item.quantity - lossAmount)
+                      };
+                    })
+                    .filter(item => item.quantity > 0); // Remove any empty items
+                  }
+                  // For fixed item loss (legacy code - may still be used in some events)
+                  else {
+                    const totalItems = updatedState.inventory.reduce((sum, item) => sum + item.quantity, 0);
+                    const itemsToRemove = Math.min(Math.abs(effect.value), totalItems);
+                    
+                    if (itemsToRemove > 0) {
+                      // Choose a random item to remove from
+                      const itemIndex = Math.floor(Math.random() * updatedState.inventory.length);
+                      const item = updatedState.inventory[itemIndex];
+                      
+                      // Remove items
+                      const newQuantity = item.quantity - itemsToRemove;
+                      
+                      if (newQuantity <= 0) {
+                        // Remove item completely
+                        updatedState.inventory = updatedState.inventory.filter((_, idx) => idx !== itemIndex);
+                      } else {
+                        // Reduce quantity
+                        updatedState.inventory = updatedState.inventory.map((item, idx) => {
+                          if (idx === itemIndex) {
+                            return { ...item, quantity: newQuantity };
+                          }
+                          return item;
+                        });
+                      }
                     }
                   }
                 }
