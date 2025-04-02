@@ -29,20 +29,20 @@ export default function Inventory({ onSellClick }: InventoryProps) {
     : sortedInventory.slice(0, 3);
   
   return (
-    <Card className="mb-4">
-      <CardHeader className="pb-2">
-        <CardTitle className="flex items-center text-lg">
-          <Shirt className="mr-2 h-5 w-5" />
-          Trenchcoat Space
-          <Badge variant="outline" className="ml-auto">
+    <Card className="mb-2 overflow-hidden">
+      <CardHeader className="py-2 px-3">
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center text-xs md:text-sm">
+            <Shirt className="mr-1 h-3 w-3 md:h-4 md:w-4" />
+            Trenchcoat
+          </CardTitle>
+          <Badge variant={capacityPercentage > 90 ? "destructive" : "outline"} className="text-[10px] h-5 ml-auto">
             {totalItems}/{gameState.maxInventorySpace}
           </Badge>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
+        </div>
         <Progress 
           value={capacityPercentage} 
-          className={`h-2 mb-4 ${
+          className={`h-1.5 mt-2 ${
             capacityPercentage > 90 
               ? "[&>div]:bg-red-500" 
               : capacityPercentage > 70 
@@ -50,13 +50,14 @@ export default function Inventory({ onSellClick }: InventoryProps) {
               : ""
           }`}
         />
-        
+      </CardHeader>
+      <CardContent className="py-0 px-3 pb-2">
         {sortedInventory.length === 0 ? (
-          <div className="text-center py-2 text-muted-foreground">
+          <div className="text-center py-1 text-muted-foreground text-xs">
             Your trenchcoat is empty
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-1 max-h-32 overflow-y-auto pr-1">
             {displayItems.map((item) => {
               // Get item definition to check price trends
               const itemDefinition = gameState.items.find(i => i.id === item.id);
@@ -67,24 +68,24 @@ export default function Inventory({ onSellClick }: InventoryProps) {
               const priceChange = priceDiff !== 0 ? (priceDiff / item.avgPurchasePrice) * 100 : 0;
               
               return (
-                <div key={item.id} className="flex items-center justify-between">
-                  <div className="flex-1">
+                <div key={item.id} className="flex items-center justify-between py-1 border-b border-border/40 last:border-0">
+                  <div className="flex-1 min-w-0">
                     <div className="flex items-center">
-                      <span className="font-medium">{itemDefinition?.name}</span>
+                      <span className="font-medium text-xs truncate">{itemDefinition?.name}</span>
                       {priceDiff > 0 ? (
-                        <TrendingUp className="ml-1 h-4 w-4 text-green-500" />
+                        <TrendingUp className="ml-1 h-3 w-3 text-green-500 flex-shrink-0" />
                       ) : priceDiff < 0 ? (
-                        <TrendingDown className="ml-1 h-4 w-4 text-red-500" />
+                        <TrendingDown className="ml-1 h-3 w-3 text-red-500 flex-shrink-0" />
                       ) : null}
                     </div>
-                    <div className="text-xs text-muted-foreground">
-                      <span>Qty: {item.quantity}</span>
-                      <span className="mx-1">•</span>
-                      <span>
-                        Avg. bought: ${item.avgPurchasePrice}
+                    <div className="text-[10px] text-muted-foreground flex items-center">
+                      <span className="truncate">Qty: {item.quantity}</span>
+                      <span className="mx-1 inline-block">•</span>
+                      <span className="truncate">
+                        ${item.avgPurchasePrice}
                       </span>
                       {priceChange !== 0 && (
-                        <span className={priceChange > 0 ? "text-green-500" : "text-red-500"}>
+                        <span className={`truncate ${priceChange > 0 ? "text-green-500" : "text-red-500"}`}>
                           {" "}({priceChange > 0 ? "+" : ""}{priceChange.toFixed(0)}%)
                         </span>
                       )}
@@ -93,6 +94,7 @@ export default function Inventory({ onSellClick }: InventoryProps) {
                   <Button 
                     variant="outline" 
                     size="sm"
+                    className="h-6 text-[10px] px-2 ml-1"
                     onClick={() => onSellClick(item.id)}
                   >
                     Sell
@@ -105,10 +107,10 @@ export default function Inventory({ onSellClick }: InventoryProps) {
               <Button
                 variant="ghost"
                 size="sm"
-                className="w-full mt-2 text-xs"
+                className="w-full h-5 text-[10px] mt-1"
                 onClick={() => setIsExpanded(!isExpanded)}
               >
-                {isExpanded ? "Show Less" : `Show ${sortedInventory.length - 3} More`}
+                {isExpanded ? "Show Less" : `+${sortedInventory.length - 3} More`}
               </Button>
             )}
           </div>

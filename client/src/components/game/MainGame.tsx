@@ -87,45 +87,66 @@ export default function MainGame() {
   };
   
   return (
-    <div className="container mx-auto max-w-5xl p-4">
-      {/* Unified Header Section with Stats and Map */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-0 mb-4 bg-gray-900 rounded-lg overflow-hidden shadow-md">
+    <div className="container mx-auto p-2 overflow-auto max-h-screen">
+      {/* Enable scrolling on the entire page */}
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          html, body {
+            overflow-y: auto !important;
+            height: 100%;
+          }
+        `
+      }} />
+      
+      {/* Unified Header Section with Stats and Map - More Compact */}
+      <div className="grid grid-cols-1 md:grid-cols-7 gap-0 mb-3 bg-gray-900 rounded-lg overflow-hidden shadow-md">
         {/* Left Side - Day Counter and Player Stats */}
-        <div className="p-5 space-y-4">
-          <DayCounter />
+        <div className="p-3 space-y-2 md:col-span-3">
+          <div className="flex items-center justify-between">
+            <DayCounter />
+            <Button 
+              className="h-8 text-xs" 
+              onClick={handleEndDay}
+              size="sm"
+              variant="outline"
+            >
+              <CalendarDays className="mr-1 h-3 w-3" />
+              End Day
+              <ArrowRight className="ml-1 h-3 w-3" />
+            </Button>
+          </div>
           <PlayerStats headerHidden={true} />
         </div>
         
         {/* Right Side - Borough Selector Map */}
-        <div className="border-l border-gray-800">
+        <div className="border-l border-gray-800 md:col-span-4">
           <BoroughSelector onBoroughSelected={handleBoroughSelected} headerHidden={true} />
         </div>
       </div>
       
-      {/* Main Game Area */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Market and Items */}
-        <div className="md:col-span-2">
+      {/* Main Game Area - Compacted */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-2">
+        {/* Market and Items - Wider */}
+        <div className="md:col-span-8">
           <MarketPlace 
             selectedItemToSell={selectedItemToSell} 
             clearSelectedItem={() => setSelectedItemToSell(null)} 
           />
         </div>
         
-        {/* Inventory, Banking, and End Day */}
-        <div className="md:col-span-1">
+        {/* Inventory, Banking, and End Day - Narrower */}
+        <div className="md:col-span-4 space-y-2">
           <Inventory onSellClick={handleSellClick} />
-          
           <Banking />
           
           <Button 
-            className="w-full mb-4" 
+            className="w-full" 
             onClick={handleEndDay}
-            size="lg"
+            size="default"
           >
-            <CalendarDays className="mr-2 h-5 w-5" />
+            <CalendarDays className="mr-1 h-4 w-4" />
             End Day {gameState.currentDay}
-            <ArrowRight className="ml-2 h-4 w-4" />
+            <ArrowRight className="ml-1 h-3 w-3" />
           </Button>
         </div>
       </div>

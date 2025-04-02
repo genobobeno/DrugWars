@@ -57,7 +57,7 @@ function App() {
   };
 
   return (
-    <div className="w-full h-full bg-background text-foreground">
+    <div className="w-full min-h-screen bg-background text-foreground overflow-y-auto overflow-x-hidden">
       {/* Add force reset button (only visible during development) */}
       <button 
         onClick={forceResetGame}
@@ -65,6 +65,20 @@ function App() {
       >
         Force Reset Game
       </button>
+      
+      {/* Global styles to ensure scrolling works properly */}
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          html, body, #root {
+            height: 100%;
+            min-height: 100%;
+            overflow-y: auto !important;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+          }
+        `
+      }} />
       
       <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>
         {gameState.phase === 'start' && <StartScreen />}

@@ -88,107 +88,90 @@ export default function Banking() {
   };
   
   return (
-    <Card className="w-full mb-4">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2">
-          <Landmark className="h-5 w-5" />
-          <span>Financial Management</span>
+    <Card className="w-full mb-2">
+      <CardHeader className="py-2 px-3">
+        <CardTitle className="flex items-center text-xs md:text-sm">
+          <Landmark className="mr-1 h-3 w-3 md:h-4 md:w-4" />
+          Financial
+          <span className="text-[10px] ml-auto">
+            Bank: ${gameState?.bank?.toLocaleString() || "0"} ({gameState.bankInterestRate}% daily)
+          </span>
         </CardTitle>
-        <CardDescription>
-          Deposit for {gameState.bankInterestRate}% daily interest or withdraw your funds
-        </CardDescription>
       </CardHeader>
       
-      <CardContent>
+      <CardContent className="p-2">
         <Tabs defaultValue="banking" className="w-full">
-          <TabsList className="w-full mb-4">
-            <TabsTrigger value="banking" className="flex-1">
-              <PiggyBank className="h-4 w-4 mr-1" />
+          <TabsList className="w-full mb-2 h-7">
+            <TabsTrigger value="banking" className="flex-1 text-[10px] h-7 py-0">
+              <PiggyBank className="h-3 w-3 mr-1" />
               <span>Banking</span>
             </TabsTrigger>
-            <TabsTrigger value="protection" className="flex-1">
-              <Shield className="h-4 w-4 mr-1" />
-              <span>Protection</span>
+            <TabsTrigger value="protection" className="flex-1 text-[10px] h-7 py-0">
+              <Shield className="h-3 w-3 mr-1" />
+              <span>Protection ({gameState?.guns || 0})</span>
             </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="banking">
-            <div className="grid grid-cols-2 gap-4">
+          <TabsContent value="banking" className="mt-0">
+            <div className="grid grid-cols-2 gap-2">
               {/* Deposit */}
-              <div className="space-y-2">
-                <div className="font-medium text-sm">Deposit Cash</div>
-                <div className="flex space-x-2">
+              <div>
+                <div className="flex space-x-1">
                   <Input
                     type="number"
-                    placeholder="Amount"
+                    placeholder="Deposit amount"
                     value={depositAmount}
                     onChange={(e) => setDepositAmount(e.target.value)}
                     min={1}
                     max={gameState?.cash || 0}
+                    className="h-7 text-xs"
                   />
                   <Button 
                     onClick={handleDeposit}
                     disabled={(gameState?.cash || 0) <= 0}
                     size="sm"
+                    className="h-7 text-[10px] px-2"
                   >
-                    <ArrowRightLeft className="h-4 w-4 mr-1" />
-                    Deposit
+                    <ArrowRightLeft className="h-3 w-3 mr-1" />
+                    Dep
                   </Button>
                 </div>
               </div>
               
               {/* Withdraw */}
-              <div className="space-y-2">
-                <div className="font-medium text-sm">Withdraw Cash</div>
-                <div className="flex space-x-2">
+              <div>
+                <div className="flex space-x-1">
                   <Input
                     type="number"
-                    placeholder="Amount"
+                    placeholder="Withdraw amount"
                     value={withdrawAmount}
                     onChange={(e) => setWithdrawAmount(e.target.value)}
                     min={1}
                     max={gameState?.bank || 0}
+                    className="h-7 text-xs"
                   />
                   <Button 
                     onClick={handleWithdraw}
                     disabled={(gameState?.bank || 0) <= 0}
                     size="sm"
                     variant="secondary"
+                    className="h-7 text-[10px] px-2"
                   >
-                    <ArrowRightLeft className="h-4 w-4 mr-1" />
-                    Withdraw
+                    <ArrowRightLeft className="h-3 w-3 mr-1" />
+                    W/D
                   </Button>
                 </div>
               </div>
             </div>
-            
-            <div className="mt-3 bg-muted/20 p-3 rounded-md">
-              <div className="flex justify-between text-sm">
-                <div className="flex items-center">
-                  <PiggyBank className="h-4 w-4 mr-1" />
-                  <span>Current Balance</span>
-                </div>
-                <div className="font-medium">${gameState?.bank?.toLocaleString() || "0"}</div>
-              </div>
-              <div className="flex justify-between text-sm text-muted-foreground mt-1">
-                <div className="flex items-center">
-                  <TrendingUp className="h-4 w-4 mr-1" />
-                  <span>Daily Interest Rate</span>
-                </div>
-                <div>{gameState?.bankInterestRate || 5}%</div>
-              </div>
-            </div>
           </TabsContent>
           
-          <TabsContent value="protection">
-            <div className="space-y-3">
-              <div className="font-medium text-sm">Buy Guns for Protection</div>
-              <p className="text-xs text-muted-foreground">
-                Guns can help protect your inventory during encounters and random events.
-                Each gun costs $500 and increases your survival chances.
+          <TabsContent value="protection" className="mt-0">
+            <div className="space-y-1">
+              <p className="text-[10px] text-muted-foreground">
+                Guns protect your drugs during events. $500 each.
               </p>
               
-              <div className="flex space-x-2">
+              <div className="flex space-x-1">
                 <Input
                   type="number"
                   placeholder="Quantity"
@@ -196,26 +179,17 @@ export default function Banking() {
                   onChange={(e) => setGunsAmount(e.target.value)}
                   min={1}
                   max={Math.floor((gameState?.cash || 0) / 500)}
+                  className="h-7 text-xs"
                 />
                 <Button 
                   onClick={handleBuyGuns}
                   disabled={(gameState?.cash || 0) < 500}
                   variant="destructive"
+                  className="h-7 text-[10px] px-2"
                 >
-                  <Shield className="h-4 w-4 mr-1" />
-                  Buy Guns
+                  <Shield className="h-3 w-3 mr-1" />
+                  Buy
                 </Button>
-              </div>
-              
-              <div className="mt-2 bg-muted/20 p-3 rounded-md">
-                <div className="flex justify-between text-sm">
-                  <div>Current Guns</div>
-                  <div className="font-medium">{gameState?.guns || 0}</div>
-                </div>
-                <div className="flex justify-between text-sm text-muted-foreground mt-1">
-                  <div>Cost per Gun</div>
-                  <div>$500</div>
-                </div>
               </div>
             </div>
           </TabsContent>
@@ -223,7 +197,7 @@ export default function Banking() {
         
         {/* Error message */}
         {error && (
-          <div className="mt-3 text-sm text-destructive">
+          <div className="mt-1 text-[10px] text-destructive">
             {error}
           </div>
         )}

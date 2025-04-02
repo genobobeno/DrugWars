@@ -171,29 +171,40 @@ export default function MarketPlace({ selectedItemToSell, clearSelectedItem }: M
   
   return (
     <>
-      {/* Available Drugs Panel */}
-      <Card className="mb-4">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center">
-            <Banknote className="mr-2 h-5 w-5" />
-            {gameState.currentBorough?.name} Drug Market
-          </CardTitle>
-          <div className="text-xs text-muted-foreground italic">
-            Day {gameState.currentDay}: Prices and availability change daily and by location.
+      {/* Compact Drug Market Panel */}
+      <Card className="mb-2">
+        <CardHeader className="pb-2 pt-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center text-sm">
+              <Banknote className="mr-1 h-4 w-4" />
+              {gameState.currentBorough?.name} Drug Market
+            </CardTitle>
+            
+            <div className="relative w-36 md:w-48">
+              <Search className="absolute left-2 top-1.5 h-3 w-3 text-muted-foreground" />
+              <Input 
+                placeholder="Search..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-7 h-7 text-xs"
+              />
+            </div>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
+        <CardContent className="py-0">
+          <div className="overflow-auto max-h-48 md:max-h-60 scrollbar-thin">
             <table className="w-full text-sm">
-              <thead className="border-b">
+              <thead className="border-b sticky top-0 bg-background z-10">
                 <tr>
-                  <th className="text-left py-2 font-medium">Drug</th>
-                  <th className="text-right py-2 font-medium">Price</th>
-                  <th className="text-right py-2 font-medium">Actions</th>
+                  <th className="text-left py-1 font-medium text-xs">Drug</th>
+                  <th className="text-right py-1 font-medium text-xs">Price</th>
+                  <th className="text-right py-1 font-medium text-xs w-16">Buy</th>
                 </tr>
               </thead>
-              <tbody>
-                {availableDrugs.map((item) => {
+              <tbody className="text-xs">
+                {availableDrugs
+                  .filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .map((item) => {
                   const price = gameState.currentPrices[item.id] || 0;
                   const inventoryItem = gameState.inventory.find(i => i.id === item.id);
                   const inInventory = inventoryItem && inventoryItem.quantity > 0;
@@ -202,37 +213,45 @@ export default function MarketPlace({ selectedItemToSell, clearSelectedItem }: M
                   
                   return (
                     <tr key={item.id} className="border-b last:border-0 hover:bg-muted/30">
-                      <td className="py-2">
-                        <div className="flex items-center gap-2">
-                          <span>{item.name}</span>
+                      <td className="py-1">
+                        <div className="flex items-center gap-1 flex-wrap">
+                          <span className="text-xs">{item.name}</span>
                           {hasEvent && (
-                            <Badge variant="destructive" className="text-[10px] h-5">HOT!</Badge>
+                            <Badge variant="destructive" className="text-[8px] h-4 px-1">HOT!</Badge>
                           )}
                           {priceIndicator && (
                             <Badge 
                               variant={priceIndicator.type === 'low' ? 'secondary' : 'outline'} 
-                              className="text-[10px] h-5"
+                              className="text-[8px] h-4 px-1"
                             >
                               {priceIndicator.text}
                             </Badge>
                           )}
+                          {inInventory && (
+                            <span className="text-[8px] text-muted-foreground">
+                              (Own: {inventoryItem?.quantity})
+                            </span>
+                          )}
                         </div>
+                        {hasEvent && (
+                          <p className="text-[8px] text-red-500 line-clamp-1 pr-2">{hasEvent}</p>
+                        )}
                       </td>
-                      <td className="py-2 text-right font-semibold">
+                      <td className="py-1 text-right font-semibold">
                         <div className="flex items-center justify-end gap-1">
-                          {priceIndicator?.type === 'low' && <TrendingUp className="h-3 w-3 text-green-500" />}
-                          {priceIndicator?.type === 'high' && <AlertTriangle className="h-3 w-3 text-red-500" />}
+                          {priceIndicator?.type === 'low' && <TrendingUp className="h-2 w-2 text-green-500" />}
+                          {priceIndicator?.type === 'high' && <AlertTriangle className="h-2 w-2 text-red-500" />}
                           ${price.toLocaleString()}
                         </div>
                       </td>
-                      <td className="py-2 text-right">
+                      <td className="py-1 text-right">
                         <Button 
                           variant="outline" 
                           size="sm"
-                          className="h-7 text-xs"
+                          className="h-5 text-[10px] px-1.5"
                           onClick={() => handleSelectItem(item)}
                         >
-                          {inInventory ? 'Buy/Sell' : 'Buy'}
+                          {inInventory ? 'Trade' : 'Buy'}
                         </Button>
                       </td>
                     </tr>
@@ -241,7 +260,7 @@ export default function MarketPlace({ selectedItemToSell, clearSelectedItem }: M
                 
                 {availableDrugs.length === 0 && (
                   <tr>
-                    <td colSpan={3} className="py-8 text-center text-muted-foreground">
+                    <td colSpan={3} className="py-8 text-center text-muted-foreground text-xs">
                       No drugs available in this location today.<br />
                       Try traveling to another borough.
                     </td>
@@ -249,84 +268,6 @@ export default function MarketPlace({ selectedItemToSell, clearSelectedItem }: M
                 )}
               </tbody>
             </table>
-          </div>
-        </CardContent>
-      </Card>
-    
-      {/* Market Place */}
-      <Card className="mb-4">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center">
-            <ShoppingCart className="mr-2 h-5 w-5" />
-            Drug Details
-          </CardTitle>
-          <div className="relative">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input 
-              placeholder="Search drugs..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-8"
-            />
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {filteredItems.map((item) => {
-              const price = gameState.currentPrices[item.id] || 0;
-              const inventoryItem = gameState.inventory.find(i => i.id === item.id);
-              const inInventory = inventoryItem && inventoryItem.quantity > 0;
-              const priceIndicator = getPriceIndicator(item, price);
-              const hasEvent = drugEvents[item.id];
-              
-              return (
-                <div 
-                  key={item.id}
-                  className={`border rounded-md p-3 cursor-pointer transition-colors hover:bg-muted/50 ${
-                    selectedItem?.id === item.id ? 'bg-muted/50 border-primary' : ''
-                  }`}
-                  onClick={() => handleSelectItem(item)}
-                >
-                  <div className="flex justify-between items-start mb-1">
-                    <div>
-                      <div className="flex items-center gap-1">
-                        <h3 className="font-medium text-sm">{item.name}</h3>
-                        {hasEvent && <Badge variant="destructive" className="text-[10px] h-5">HOT!</Badge>}
-                      </div>
-                      <p className="text-xs text-muted-foreground line-clamp-1">{item.description}</p>
-                    </div>
-                    <div className="text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        {priceIndicator?.type === 'low' && <TrendingUp className="h-3 w-3 text-green-500" />}
-                        {priceIndicator?.type === 'high' && <AlertTriangle className="h-3 w-3 text-red-500" />}
-                        <p className="font-bold">${price.toLocaleString()}</p>
-                      </div>
-                      {inInventory && (
-                        <p className="text-xs text-muted-foreground">
-                          Own: {inventoryItem?.quantity}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  
-                  {hasEvent && (
-                    <div className="bg-red-500/10 p-1.5 rounded text-xs mt-1 text-red-600">
-                      <strong>ALERT:</strong> {hasEvent}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-            
-            {filteredItems.length === 0 && (
-              <div className="col-span-full text-center py-6 text-muted-foreground">
-                {searchQuery ? (
-                  <>No drugs found matching "{searchQuery}"</>
-                ) : (
-                  <>No drugs available in this location today. Try traveling to another borough.</>
-                )}
-              </div>
-            )}
           </div>
         </CardContent>
       </Card>
