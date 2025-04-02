@@ -4,9 +4,11 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
 import { Slider } from "../ui/slider";
-import { ShoppingCart, Banknote, AlertCircle, BadgeInfo, Search } from "lucide-react";
+import { Badge } from "../ui/badge";
+import { ShoppingCart, Banknote, AlertCircle, BadgeInfo, Search, AlertTriangle, TrendingUp } from "lucide-react";
 import { useGlobalGameState } from "../../lib/stores/useGlobalGameState";
 import { useAudio } from "../../lib/stores/useAudio";
+import { isDrugAvailable, getDrugEventDescription } from "../../lib/priceGenerator";
 import { 
   Dialog,
   DialogContent,
@@ -16,6 +18,7 @@ import {
   DialogTitle
 } from "../ui/dialog";
 import { InventoryItem, MarketItem } from "../../types/game";
+import { drugs } from "../../lib/gameData";
 
 interface MarketPlaceProps {
   selectedItemToSell: string | null;
@@ -31,6 +34,16 @@ export default function MarketPlace({ selectedItemToSell, clearSelectedItem }: M
   const [quantity, setQuantity] = useState<number>(1);
   const [transactionType, setTransactionType] = useState<'buy' | 'sell'>('buy');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [drugEvents, setDrugEvents] = useState<Record<string, string | null>>({});
+  
+  // Initialize drug events
+  useEffect(() => {
+    const events: Record<string, string | null> = {};
+    drugs.forEach(drug => {
+      events[drug.id] = getDrugEventDescription(drug.id);
+    });
+    setDrugEvents(events);
+  }, [gameState.currentDay]);
   
   // Update inventory item when selected from outside
   useEffect(() => {
@@ -48,8 +61,13 @@ export default function MarketPlace({ selectedItemToSell, clearSelectedItem }: M
     }
   }, [selectedItemToSell, gameState.inventory, gameState.items]);
   
+  // Filter available drugs
+  const availableDrugs = gameState.items.filter(item => 
+    isDrugAvailable(item.id, gameState.currentPrices)
+  );
+  
   // Filter items based on search query
-  const filteredItems = gameState.items.filter(item => 
+  const filteredItems = availableDrugs.filter(item => 
     item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     item.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -61,6 +79,7 @@ export default function MarketPlace({ selectedItemToSell, clearSelectedItem }: M
     setTransactionType('buy');
     setQuantity(1);
     setErrorMessage(null);
+    playHit();
   };
   
   // Calculate total cost/value
@@ -135,6 +154,21 @@ export default function MarketPlace({ selectedItemToSell, clearSelectedItem }: M
     }
   };
   
+  // Check if a price is exceptionally high or low compared to base price
+  const getPriceIndicator = (item: MarketItem, price: number) => {
+    const drug = drugs.find(d => d.id === item.id);
+    if (!drug) return null;
+    
+    const avgNormalPrice = (drug.noEventParameters[0] + drug.noEventParameters[1]) / 2;
+    
+    if (price < avgNormalPrice * 0.5) {
+      return { type: 'low', text: 'Cheap!' };
+    } else if (price > avgNormalPrice * 1.5) {
+      return { type: 'high', text: 'Expensive!' };
+    }
+    return null;
+  };
+  
   return (
     <>
       {/* Available Drugs Panel */}
@@ -142,8 +176,11 @@ export default function MarketPlace({ selectedItemToSell, clearSelectedItem }: M
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center">
             <Banknote className="mr-2 h-5 w-5" />
-            Available Drugs
+            {gameState.currentBorough?.name} Drug Market
           </CardTitle>
+          <div className="text-xs text-muted-foreground italic">
+            Day {gameState.currentDay}: Prices and availability change daily and by location.
+          </div>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
@@ -156,15 +193,38 @@ export default function MarketPlace({ selectedItemToSell, clearSelectedItem }: M
                 </tr>
               </thead>
               <tbody>
-                {gameState.items.map((item) => {
+                {availableDrugs.map((item) => {
                   const price = gameState.currentPrices[item.id] || 0;
                   const inventoryItem = gameState.inventory.find(i => i.id === item.id);
                   const inInventory = inventoryItem && inventoryItem.quantity > 0;
+                  const priceIndicator = getPriceIndicator(item, price);
+                  const hasEvent = drugEvents[item.id];
                   
                   return (
                     <tr key={item.id} className="border-b last:border-0 hover:bg-muted/30">
-                      <td className="py-2">{item.name}</td>
-                      <td className="py-2 text-right">${price.toLocaleString()}</td>
+                      <td className="py-2">
+                        <div className="flex items-center gap-2">
+                          <span>{item.name}</span>
+                          {hasEvent && (
+                            <Badge variant="destructive" className="text-[10px] h-5">HOT!</Badge>
+                          )}
+                          {priceIndicator && (
+                            <Badge 
+                              variant={priceIndicator.type === 'low' ? 'secondary' : 'outline'} 
+                              className="text-[10px] h-5"
+                            >
+                              {priceIndicator.text}
+                            </Badge>
+                          )}
+                        </div>
+                      </td>
+                      <td className="py-2 text-right font-semibold">
+                        <div className="flex items-center justify-end gap-1">
+                          {priceIndicator?.type === 'low' && <TrendingUp className="h-3 w-3 text-green-500" />}
+                          {priceIndicator?.type === 'high' && <AlertTriangle className="h-3 w-3 text-red-500" />}
+                          ${price.toLocaleString()}
+                        </div>
+                      </td>
                       <td className="py-2 text-right">
                         <Button 
                           variant="outline" 
@@ -178,6 +238,15 @@ export default function MarketPlace({ selectedItemToSell, clearSelectedItem }: M
                     </tr>
                   );
                 })}
+                
+                {availableDrugs.length === 0 && (
+                  <tr>
+                    <td colSpan={3} className="py-8 text-center text-muted-foreground">
+                      No drugs available in this location today.<br />
+                      Try traveling to another borough.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -189,12 +258,12 @@ export default function MarketPlace({ selectedItemToSell, clearSelectedItem }: M
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center">
             <ShoppingCart className="mr-2 h-5 w-5" />
-            {gameState.currentBorough?.name} Market
+            Drug Details
           </CardTitle>
           <div className="relative">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input 
-              placeholder="Search items..." 
+              placeholder="Search drugs..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-8"
@@ -207,6 +276,8 @@ export default function MarketPlace({ selectedItemToSell, clearSelectedItem }: M
               const price = gameState.currentPrices[item.id] || 0;
               const inventoryItem = gameState.inventory.find(i => i.id === item.id);
               const inInventory = inventoryItem && inventoryItem.quantity > 0;
+              const priceIndicator = getPriceIndicator(item, price);
+              const hasEvent = drugEvents[item.id];
               
               return (
                 <div 
@@ -216,13 +287,20 @@ export default function MarketPlace({ selectedItemToSell, clearSelectedItem }: M
                   }`}
                   onClick={() => handleSelectItem(item)}
                 >
-                  <div className="flex justify-between items-start">
+                  <div className="flex justify-between items-start mb-1">
                     <div>
-                      <h3 className="font-medium text-sm">{item.name}</h3>
+                      <div className="flex items-center gap-1">
+                        <h3 className="font-medium text-sm">{item.name}</h3>
+                        {hasEvent && <Badge variant="destructive" className="text-[10px] h-5">HOT!</Badge>}
+                      </div>
                       <p className="text-xs text-muted-foreground line-clamp-1">{item.description}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-bold">${price.toLocaleString()}</p>
+                      <div className="flex items-center justify-end gap-1">
+                        {priceIndicator?.type === 'low' && <TrendingUp className="h-3 w-3 text-green-500" />}
+                        {priceIndicator?.type === 'high' && <AlertTriangle className="h-3 w-3 text-red-500" />}
+                        <p className="font-bold">${price.toLocaleString()}</p>
+                      </div>
                       {inInventory && (
                         <p className="text-xs text-muted-foreground">
                           Own: {inventoryItem?.quantity}
@@ -230,13 +308,23 @@ export default function MarketPlace({ selectedItemToSell, clearSelectedItem }: M
                       )}
                     </div>
                   </div>
+                  
+                  {hasEvent && (
+                    <div className="bg-red-500/10 p-1.5 rounded text-xs mt-1 text-red-600">
+                      <strong>ALERT:</strong> {hasEvent}
+                    </div>
+                  )}
                 </div>
               );
             })}
             
             {filteredItems.length === 0 && (
               <div className="col-span-full text-center py-6 text-muted-foreground">
-                No items found matching "{searchQuery}"
+                {searchQuery ? (
+                  <>No drugs found matching "{searchQuery}"</>
+                ) : (
+                  <>No drugs available in this location today. Try traveling to another borough.</>
+                )}
               </div>
             )}
           </div>
@@ -267,6 +355,12 @@ export default function MarketPlace({ selectedItemToSell, clearSelectedItem }: M
           </DialogHeader>
           
           <div className="space-y-4 py-2">
+            {selectedItem && drugEvents[selectedItem.id] && (
+              <div className="bg-red-500/10 p-2 rounded text-sm border border-red-200">
+                <strong className="text-red-600">ALERT:</strong> {drugEvents[selectedItem.id]}
+              </div>
+            )}
+            
             <div className="flex justify-between">
               <span>Price Per Unit:</span>
               <span className="font-medium">${gameState.currentPrices[selectedItem?.id || ''] || 0}</span>
@@ -303,7 +397,7 @@ export default function MarketPlace({ selectedItemToSell, clearSelectedItem }: M
             
             <div className="bg-muted/30 rounded-md p-3">
               <div className="flex justify-between text-sm mb-2">
-                <span>Total Cost:</span>
+                <span>Total {transactionType === 'buy' ? 'Cost' : 'Value'}:</span>
                 <span className="font-bold">${calculateTotal().toLocaleString()}</span>
               </div>
               
@@ -334,7 +428,7 @@ export default function MarketPlace({ selectedItemToSell, clearSelectedItem }: M
               <div className="flex items-start gap-2 text-sm">
                 <BadgeInfo className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
                 <p className="text-muted-foreground">
-                  Prices fluctuate daily. Buy low and sell high to maximize profits!
+                  Prices change depending on location and special events. Buy low and sell high to maximize profits!
                 </p>
               </div>
             )}

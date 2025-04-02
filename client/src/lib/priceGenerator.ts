@@ -1,36 +1,67 @@
-import { MarketItem, Borough } from "../types/game";
+import { MarketItem, Borough, DrugItem } from "../types/game";
+import { drugs } from "./gameData";
 
-// Generate prices for all items based on location and random factors
+// Generate prices for all items based on location, drug availability, and events
 export function generatePrices(items: MarketItem[], currentBorough: Borough | null): Record<string, number> {
   const prices: Record<string, number> = {};
+  const availableItems: Record<string, boolean> = {};
   
-  // Get a random factor for the entire market (simulates market trends)
-  const marketFactor = 0.9 + Math.random() * 0.2; // 0.9 to 1.1
-  
-  for (const item of items) {
-    let price = item.basePrice;
+  // Process each drug to determine availability and pricing
+  for (const drug of drugs) {
+    // Determine if the drug is available in the market today
+    const isAvailable = Math.random() < drug.marketDailyProbability;
+    availableItems[drug.id] = isAvailable;
     
-    // Apply random volatility based on item's properties
-    const volatilityFactor = 1 + (Math.random() * 2 - 1) * item.volatility;
-    price *= volatilityFactor;
-    
-    // Apply market trend factor
-    price *= marketFactor;
-    
-    // Apply location-based factor if a borough is provided
-    if (currentBorough) {
-      const locationFactor = currentBorough.priceFactors[item.category as keyof typeof currentBorough.priceFactors] || 1;
-      price *= locationFactor;
+    if (isAvailable) {
+      // Check if a special event is happening for this drug
+      const isEvent = Math.random() < drug.dailyEventProbability;
+      
+      let price: number;
+      
+      if (isEvent) {
+        // Use event price range
+        const [min, max] = drug.eventParameters;
+        price = min + Math.random() * (max - min);
+      } else {
+        // Use normal price range
+        const [min, max] = drug.noEventParameters;
+        price = min + Math.random() * (max - min);
+      }
+      
+      // Apply location-based factor if a borough is provided
+      if (currentBorough) {
+        const locationFactor = currentBorough.priceFactors[drug.category as keyof typeof currentBorough.priceFactors] || 1;
+        price *= locationFactor;
+      }
+      
+      // Add small random variation to make prices look more natural
+      price = price * (0.95 + Math.random() * 0.1);
+      
+      // Round to nearest dollar
+      prices[drug.id] = Math.round(price);
+    } else {
+      // Drug is not available in this market
+      prices[drug.id] = -1; // Use -1 to indicate unavailability
     }
-    
-    // Add small random variation to make prices look more natural
-    price = price * (0.95 + Math.random() * 0.1);
-    
-    // Round to nearest dollar
-    prices[item.id] = Math.round(price);
   }
   
   return prices;
+}
+
+// Get event description if there's an active event for this drug
+export function getDrugEventDescription(drugId: string): string | null {
+  const drug = drugs.find(d => d.id === drugId);
+  if (!drug) return null;
+  
+  // Simulate if there's an event (this should match the logic in generatePrices)
+  const isEvent = Math.random() < drug.dailyEventProbability;
+  
+  return isEvent ? drug.eventDescription : null;
+}
+
+// Check if a drug is available in the current market
+export function isDrugAvailable(drugId: string, prices: Record<string, number>): boolean {
+  return prices[drugId] > 0; // If price is -1, drug is unavailable
 }
 
 // Generate sale price for a specific item (for events or special deals)

@@ -1,4 +1,4 @@
-import { Borough, MarketItem } from "../types/game";
+import { Borough, MarketItem, DrugItem } from "../types/game";
 
 // Define the boroughs
 export const boroughs: Borough[] = [
@@ -7,11 +7,7 @@ export const boroughs: Borough[] = [
     name: "The Bronx",
     description: "Rough and varied, with both high crime areas and family neighborhoods.",
     priceFactors: {
-      electronics: 0.9,
-      luxury: 1.2,
-      medication: 1.0,
-      contraband: 0.8,
-      food: 0.9
+      drugs: 0.9
     }
   },
   {
@@ -19,11 +15,7 @@ export const boroughs: Borough[] = [
     name: "Brooklyn",
     description: "Trendy and diverse with artsy neighborhoods and industrial zones.",
     priceFactors: {
-      electronics: 1.0,
-      luxury: 1.1,
-      medication: 0.9,
-      contraband: 0.9,
-      food: 0.8
+      drugs: 1.0
     }
   },
   {
@@ -31,11 +23,7 @@ export const boroughs: Borough[] = [
     name: "Manhattan",
     description: "The heart of NYC, expensive and heavily policed.",
     priceFactors: {
-      electronics: 1.2,
-      luxury: 1.5,
-      medication: 1.2,
-      contraband: 1.3,
-      food: 1.1
+      drugs: 1.3
     }
   },
   {
@@ -43,11 +31,7 @@ export const boroughs: Borough[] = [
     name: "Queens",
     description: "Diverse and residential with many cultural communities.",
     priceFactors: {
-      electronics: 0.95,
-      luxury: 0.9,
-      medication: 0.95,
-      contraband: 1.0,
-      food: 0.85
+      drugs: 0.95
     }
   },
   {
@@ -55,144 +39,177 @@ export const boroughs: Borough[] = [
     name: "Staten Island",
     description: "Suburban and isolated, with less police presence.",
     priceFactors: {
-      electronics: 1.1,
-      luxury: 0.8,
-      medication: 1.1,
-      contraband: 0.7,
-      food: 1.0
+      drugs: 0.85
     }
   }
 ];
 
-// Define the market items
-export const items: MarketItem[] = [
-  // Electronics category
+// Define the drug items
+export const drugs: DrugItem[] = [
   {
-    id: "smartphone",
-    name: "Smartphone",
-    category: "electronics",
-    description: "Latest model smartphone, high demand everywhere.",
-    basePrice: 800,
-    volatility: 0.15
+    id: "acid",
+    name: "Acid",
+    category: "drugs",
+    description: "Hallucinogenic drug with intense visual effects.",
+    basePrice: 3000, // Average of normal range
+    volatility: 0.3,
+    marketDailyProbability: 0.85,
+    dailyEventProbability: 0.1,
+    eventDescription: "There's a ton of acid hitting the streets, prices are cheap!",
+    noEventParameters: [1000, 4500],
+    eventParameters: [200, 700]
   },
   {
-    id: "laptop",
-    name: "Laptop Computer",
-    category: "electronics",
-    description: "Business-grade laptop, popular in Manhattan.",
-    basePrice: 1200,
-    volatility: 0.25
+    id: "cocaine",
+    name: "Cocaine",
+    category: "drugs",
+    description: "Powerful stimulant with high street value.",
+    basePrice: 22500, // Average of normal range
+    volatility: 0.4,
+    marketDailyProbability: 0.8,
+    dailyEventProbability: 0.1,
+    eventDescription: "Cops made a massive cocaine bust! Demand is exploding!",
+    noEventParameters: [15000, 30000],
+    eventParameters: [40000, 130000]
   },
   {
-    id: "headphones",
-    name: "Premium Headphones",
-    category: "electronics",
-    description: "Noise-cancelling headphones, popular with commuters.",
-    basePrice: 300,
-    volatility: 0.2
-  },
-  
-  // Luxury category
-  {
-    id: "watch",
-    name: "Luxury Watch",
-    category: "luxury",
-    description: "High-end timepiece, especially valuable in wealthy areas.",
-    basePrice: 5000,
-    volatility: 0.3
+    id: "hashish",
+    name: "Hashish",
+    category: "drugs",
+    description: "Concentrated cannabis extract.",
+    basePrice: 750, // Average of normal range
+    volatility: 0.25,
+    marketDailyProbability: 0.85,
+    dailyEventProbability: 0.15,
+    eventDescription: "The Marrakesh Express has arrived!",
+    noEventParameters: [500, 1000],
+    eventParameters: [50, 150]
   },
   {
-    id: "jewelry",
-    name: "Designer Jewelry",
-    category: "luxury",
-    description: "Fashionable accessories, popular in Manhattan.",
-    basePrice: 2000,
-    volatility: 0.35
+    id: "heroin",
+    name: "Heroin",
+    category: "drugs",
+    description: "Highly addictive opiate with severe legal consequences.",
+    basePrice: 9500, // Average of normal range
+    volatility: 0.35,
+    marketDailyProbability: 0.8,
+    dailyEventProbability: 0.11,
+    eventDescription: "Police raided a local lab, prices of heroin are on fire!",
+    noEventParameters: [5000, 14000],
+    eventParameters: [25000, 50000]
   },
   {
-    id: "sneakers",
-    name: "Limited Edition Sneakers",
-    category: "luxury",
-    description: "Collectible footwear, high demand in Brooklyn.",
-    basePrice: 600,
-    volatility: 0.4
-  },
-  
-  // Medication category
-  {
-    id: "painkillers",
-    name: "Pain Relievers",
-    category: "medication",
-    description: "Over-the-counter medication, steady demand everywhere.",
-    basePrice: 50,
-    volatility: 0.1
+    id: "ecstasy",
+    name: "Ecstasy",
+    category: "drugs",
+    description: "Popular club drug that induces euphoria.",
+    basePrice: 65, // Average of normal range
+    volatility: 0.3,
+    marketDailyProbability: 0.85,
+    dailyEventProbability: 0.13,
+    eventDescription: "Dealers are loaded on inventory and giving pills like candy!",
+    noEventParameters: [30, 100],
+    eventParameters: [3, 15]
   },
   {
-    id: "antibiotics",
-    name: "Antibiotics",
-    category: "medication",
-    description: "Generic antibiotics, useful during flu season.",
-    basePrice: 120,
-    volatility: 0.2
+    id: "smack",
+    name: "Smack",
+    category: "drugs",
+    description: "Street version of heroin, often impure.",
+    basePrice: 2900, // Average of normal range
+    volatility: 0.3,
+    marketDailyProbability: 0.65,
+    dailyEventProbability: 0.08,
+    eventDescription: "Lots of smack nearby, prices have bottomed out!",
+    noEventParameters: [1600, 4200],
+    eventParameters: [400, 900]
   },
   {
-    id: "vitamins",
-    name: "Health Supplements",
-    category: "medication",
-    description: "Various vitamins and supplements, popular in affluent areas.",
-    basePrice: 80,
-    volatility: 0.15
-  },
-  
-  // Contraband category
-  {
-    id: "cigarettes",
-    name: "Cigarette Cartons",
-    category: "contraband",
-    description: "Untaxed cigarettes, risky but profitable.",
-    basePrice: 100,
-    volatility: 0.5
+    id: "opium",
+    name: "Opium",
+    category: "drugs",
+    description: "Raw opiate derived from poppy plants.",
+    basePrice: 900, // Average of normal range
+    volatility: 0.25,
+    marketDailyProbability: 0.7,
+    dailyEventProbability: 0.1,
+    eventDescription: "Local dealer got raided and people are looking for opium!",
+    noEventParameters: [500, 1300],
+    eventParameters: [2000, 4000]
   },
   {
-    id: "counterfeit",
-    name: "Counterfeit Goods",
-    category: "contraband",
-    description: "Fake designer items, high risk of police attention.",
-    basePrice: 300,
-    volatility: 0.6
+    id: "crack",
+    name: "Crack",
+    category: "drugs",
+    description: "Highly addictive form of cocaine.",
+    basePrice: 2200, // Average of normal range
+    volatility: 0.35,
+    marketDailyProbability: 0.65,
+    dailyEventProbability: 0.1,
+    eventDescription: "Crackheads been rounded up and there's too much supply!",
+    noEventParameters: [1400, 3000],
+    eventParameters: [400, 800]
   },
   {
-    id: "fake_id",
-    name: "Fake IDs",
-    category: "contraband",
-    description: "Forged identification, very high risk but valuable.",
-    basePrice: 200,
-    volatility: 0.7
-  },
-  
-  // Food category
-  {
-    id: "coffee",
-    name: "Artisanal Coffee",
-    category: "food",
-    description: "Premium coffee beans, popular in Brooklyn and Manhattan.",
-    basePrice: 30,
-    volatility: 0.1
+    id: "peyote",
+    name: "Peyote",
+    category: "drugs",
+    description: "Natural hallucinogen from cactus.",
+    basePrice: 450, // Average of normal range
+    volatility: 0.2,
+    marketDailyProbability: 0.6,
+    dailyEventProbability: 0.08,
+    eventDescription: "Lots of peyote just got dropped off, get it while its hot!",
+    noEventParameters: [200, 700],
+    eventParameters: [50, 100]
   },
   {
-    id: "spices",
-    name: "Exotic Spices",
-    category: "food",
-    description: "Rare cooking ingredients, popular in Queens' diverse communities.",
-    basePrice: 40,
-    volatility: 0.2
+    id: "shrooms",
+    name: "Shrooms",
+    category: "drugs",
+    description: "Psychedelic mushrooms with hallucinogenic effects.",
+    basePrice: 900, // Average of normal range
+    volatility: 0.25,
+    marketDailyProbability: 0.65,
+    dailyEventProbability: 0.08,
+    eventDescription: "People started growing their own, prices are down!",
+    noEventParameters: [600, 1200],
+    eventParameters: [100, 300]
   },
   {
-    id: "snacks",
-    name: "imported Snacks",
-    category: "food",
-    description: "International snack foods, novelty items in many neighborhoods.",
-    basePrice: 20,
-    volatility: 0.15
+    id: "speed",
+    name: "Speed",
+    category: "drugs",
+    description: "Amphetamine stimulant, popular in club scenes.",
+    basePrice: 150, // Average of normal range
+    volatility: 0.4,
+    marketDailyProbability: 0.8,
+    dailyEventProbability: 0.1,
+    eventDescription: "Cops are all over the clubs, the locals need their speed!",
+    noEventParameters: [50, 250],
+    eventParameters: [400, 700]
+  },
+  {
+    id: "weed",
+    name: "Weed",
+    category: "drugs",
+    description: "Cannabis, most common illicit drug.",
+    basePrice: 600, // Average of normal range
+    volatility: 0.3,
+    marketDailyProbability: 0.85,
+    dailyEventProbability: 0.15,
+    eventDescription: "Homegrown just harvested! Prices are crashing!",
+    noEventParameters: [300, 900],
+    eventParameters: [50, 150]
   }
 ];
+
+// For backward compatibility - convert drugs to MarketItem format
+export const items: MarketItem[] = drugs.map(drug => ({
+  id: drug.id,
+  name: drug.name,
+  category: drug.category,
+  description: drug.description,
+  basePrice: drug.basePrice,
+  volatility: drug.volatility
+}));

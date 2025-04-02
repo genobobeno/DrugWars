@@ -21,6 +21,15 @@ export interface MarketItem {
   volatility: number;
 }
 
+// Drug item interface with additional properties for the drug wars game
+export interface DrugItem extends MarketItem {
+  marketDailyProbability: number; // Chance of appearing in market
+  dailyEventProbability: number;  // Chance of special event
+  eventDescription: string;       // Description of special event
+  noEventParameters: [number, number]; // Price range when no event
+  eventParameters: [number, number];   // Price range during event
+}
+
 // Player inventory item
 export interface InventoryItem {
   id: string;
