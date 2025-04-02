@@ -128,7 +128,7 @@ export default function MainGame() {
       <div className="flex flex-col md:flex-row gap-0 mb-3 bg-gray-900 rounded-lg overflow-hidden shadow-md">
         {/* Left Side - Day Counter and Player Stats with Borough Background - Wider */}
         <div className="flex-grow relative">
-          <div className="absolute top-0 left-0 right-0 z-10 p-3">
+          <div className="absolute top-[20px] left-0 right-0 z-10 p-3">
             <DayCounter />
           </div>
           <div className="h-[400px]">
