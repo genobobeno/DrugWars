@@ -53,7 +53,8 @@ export default function MarketPlace({ selectedItemToSell, clearSelectedItem }: M
           setSelectedInventoryItem(item);
           setSelectedItem(marketItem);
           setTransactionType('sell');
-          setQuantity(1);
+          // Set quantity to maximum available quantity
+          setQuantity(item.quantity);
         }
       }
     }
@@ -69,7 +70,15 @@ export default function MarketPlace({ selectedItemToSell, clearSelectedItem }: M
     setSelectedItem(item);
     setSelectedInventoryItem(null);
     setTransactionType('buy');
-    setQuantity(1);
+    
+    // Calculate the maximum quantity the player can buy
+    const price = gameState.currentPrices[item.id] || 0;
+    const maxAffordable = Math.floor(gameState.cash / price);
+    const spaceLeft = gameState.maxInventorySpace - gameState.inventory.reduce((sum, item) => sum + item.quantity, 0);
+    const maxQuantity = Math.min(maxAffordable, spaceLeft);
+    
+    // Set quantity to maximum available (if at least 1)
+    setQuantity(Math.max(1, maxQuantity));
     setErrorMessage(null);
     playHit();
   };
