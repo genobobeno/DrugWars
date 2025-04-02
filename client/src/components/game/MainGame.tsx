@@ -39,32 +39,39 @@ export default function MainGame() {
       return; // Already in this borough
     }
     
-    // Set new borough
+    // Always set new borough first
     setCurrentBorough(borough);
+    
+    // Always update prices and progress day when traveling to a new borough
+    updatePrices();
+    progressDay();
+    
+    // After advancing the day, check for events
+    let eventTriggered = false;
     
     // Check for travel event first (30% chance)
     if (Math.random() < 0.3) {
       const travelEvent = getRandomEvent('travel', gameState);
       if (travelEvent) {
         setGameEvent(travelEvent);
-        return;
+        eventTriggered = true;
       }
     }
     
     // If no travel event, check for a daily random event (40% chance)
     // This includes trenchcoat offers, gun offers, police encounters, etc.
-    if (Math.random() < 0.4) {
+    if (!eventTriggered && Math.random() < 0.4) {
       const dailyEvent = getRandomEvent('daily', gameState);
       if (dailyEvent) {
         setGameEvent(dailyEvent);
-        return;
+        eventTriggered = true;
       }
     }
     
-    // If no events triggered, just update prices and progress to next day
-    updatePrices();
-    progressDay();
-    playSuccess();
+    // Play success sound if no event was triggered
+    if (!eventTriggered) {
+      playSuccess();
+    }
   };
   
   // Handle selling an item
@@ -96,10 +103,8 @@ export default function MainGame() {
         localStorage.setItem("nyc-hustler-game-state", JSON.stringify(updatedGameState));
       }
       
-      // Always progress the day after handling ANY event (travel or daily)
-      // This ensures that all travel and all daily events lead to day advancement
-      updatePrices();
-      progressDay();
+      // No need to progress the day here anymore since we're now advancing
+      // the day when selecting a borough, regardless of events
       playSuccess();
     }
     
