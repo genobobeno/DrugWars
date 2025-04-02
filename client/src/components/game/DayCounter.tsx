@@ -40,10 +40,25 @@ export default function DayCounter() {
         {progressValue >= 90 && progressValue < 100 && "Last few days! Go big or go home"}
       </p>
       
-      {/* Final day warning */}
+      {/* Final day warning with action button */}
       {remainingDays === 0 && (
         <div className="bg-red-900/50 border border-red-700 rounded-md mt-2 p-2 text-sm text-white">
-          <strong className="font-semibold">FINAL DAY!</strong> Sell your inventory to maximize profits before the game ends!
+          <div className="flex justify-between items-center">
+            <div>
+              <strong className="font-semibold">FINAL DAY!</strong> Sell your inventory to maximize profits before the game ends!
+            </div>
+            <button 
+              onClick={() => {
+                // Trigger the same day progression as the borough selection to ensure the game transitions to game over phase
+                const { updatePrices, progressDay } = useGlobalGameState.getState();
+                updatePrices();
+                progressDay();
+              }}
+              className="bg-green-600 hover:bg-green-700 text-white font-bold py-1 px-3 rounded text-sm transition-colors duration-200"
+            >
+              Let's go count our money!
+            </button>
+          </div>
         </div>
       )}
     </div>
