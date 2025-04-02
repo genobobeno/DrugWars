@@ -36,15 +36,16 @@ export default function GameStatsFooter() {
   };
   
   return (
-    <footer className="px-4 py-2 border-t">
-      <div className="container mx-auto flex justify-between items-center text-xs text-muted-foreground">
+    <footer className="px-4 py-2 border-t mt-6">
+      <div className="container mx-auto flex flex-col sm:flex-row justify-between items-center text-xs text-muted-foreground gap-2">
         <div>
           <span className="font-medium">Drug Empire</span> • NYC Hustle Simulator
         </div>
         
-        <Separator orientation="vertical" className="h-4 mx-2" />
+        <Separator orientation="vertical" className="h-4 mx-2 hidden sm:block" />
+        <Separator orientation="horizontal" className="w-full h-px block sm:hidden" />
         
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center justify-center gap-3">
           {loading ? (
             <span className="flex items-center">
               <Loader2 className="h-3 w-3 mr-1 animate-spin" />
@@ -55,9 +56,11 @@ export default function GameStatsFooter() {
           ) : stats ? (
             <>
               <span>{stats.totalGamesStarted} Games Started</span>
-              <Separator orientation="vertical" className="h-3" />
+              <Separator orientation="vertical" className="h-3 hidden sm:block" />
+              <Separator orientation="horizontal" className="w-full h-px block sm:hidden" />
               <span>{stats.totalGamesCompleted} Games Completed</span>
-              <Separator orientation="vertical" className="h-3" />
+              <Separator orientation="vertical" className="h-3 hidden sm:block" />
+              <Separator orientation="horizontal" className="w-full h-px block sm:hidden" />
               <span>Last updated: {formatDate(stats.lastUpdated)}</span>
             </>
           ) : null}

@@ -93,7 +93,7 @@ export default function Banking() {
   
   return (
     <>
-      <Card className="w-full mb-2">
+      <Card className="w-full mb-12 sm:mb-2">
         <CardHeader className="py-2 px-3">
           <CardTitle className="flex items-center text-xs md:text-sm">
             <Landmark className="mr-1 h-3 w-3 md:h-4 md:w-4" />

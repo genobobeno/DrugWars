@@ -57,7 +57,7 @@ function App() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-background text-foreground overflow-y-auto overflow-x-hidden">
+    <div className="w-full min-h-screen bg-background text-foreground overflow-y-auto overflow-x-hidden pb-24 relative">
       {/* Add force reset button (only visible during development) */}
       <button 
         onClick={forceResetGame}
@@ -76,6 +76,23 @@ function App() {
             overflow-x: hidden;
             margin: 0;
             padding: 0;
+            padding-bottom: env(safe-area-inset-bottom, 24px);
+          }
+          
+          /* Ensure footer stays at the bottom but doesn't overlap content */
+          footer {
+            position: relative;
+            z-index: 10;
+            margin-top: auto;
+            width: 100%;
+            background-color: var(--background);
+          }
+          
+          /* Add padding to main content area on mobile */
+          @media (max-width: 640px) {
+            .container {
+              padding-bottom: 4rem;
+            }
           }
         `
       }} />

@@ -108,7 +108,7 @@ export default function MainGame() {
   };
   
   return (
-    <div className="container mx-auto p-2 overflow-auto max-h-screen">
+    <div className="container mx-auto p-2 overflow-auto max-h-screen pb-24">
       {/* Enable scrolling on the entire page */}
       <style dangerouslySetInnerHTML={{
         __html: `
