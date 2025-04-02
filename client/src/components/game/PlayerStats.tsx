@@ -22,24 +22,24 @@ export default function PlayerStats({ headerHidden = false }: PlayerStatsProps) 
     const getBoroughImage = (boroughId: string) => {
       switch (boroughId) {
         case "bronx":
-          return "/NY_Bronx.PNG";
+          return "/images/boroughs/NY_Bronx.PNG";
         case "brooklyn":
-          return "/NY_Brooklyn.PNG";
+          return "/images/boroughs/NY_Brooklyn.PNG";
         case "manhattan":
-          return "/NY_Manhattan.PNG";
+          return "/images/boroughs/NY_Manhattan.PNG";
         case "queens":
-          return "/NY_Queens.PNG";
+          return "/images/boroughs/NY_Queens.PNG";
         case "staten_island":
-          return "/NY_StatenIsland.PNG";
+          return "/images/boroughs/NY_StatenIsland.PNG";
         default:
-          return "/NYBoroughs.webp"; // Default image of all NYC
+          return "/images/boroughs/NYBoroughs.webp"; // Default image of all NYC
       }
     };
     
     if (gameState.currentBorough) {
       setBackgroundImage(getBoroughImage(gameState.currentBorough.id));
     } else {
-      setBackgroundImage("/NYBoroughs.webp");
+      setBackgroundImage("/images/boroughs/NYBoroughs.webp");
     }
   }, [gameState.currentBorough]);
   
@@ -49,21 +49,21 @@ export default function PlayerStats({ headerHidden = false }: PlayerStatsProps) 
   const bankFormatted = gameState?.bank?.toLocaleString() || "0";
   
   return (
-    <div className={`relative ${headerHidden ? "" : "rounded-md overflow-hidden mb-4"} h-full`}>
+    <div className={`relative ${headerHidden ? "" : "rounded-md overflow-hidden mb-4"} h-full flex flex-col`} style={{ minHeight: '400px' }}>
       {/* Borough Background Image - Full height */}
       {!headerHidden && (
         <div 
           className="absolute inset-0 w-full h-full bg-cover bg-center"
           style={{ 
             backgroundImage: `url('${backgroundImage}')`,
-            opacity: 0.6, // Semi-transparent background
+            opacity: 0.9, // More visible background
           }}
         />
       )}
       
-      {/* Dark overlay to improve text readability */}
+      {/* Dark overlay to improve text readability - lighter to see background better */}
       {!headerHidden && (
-        <div className="absolute inset-0 bg-black opacity-60" />
+        <div className="absolute inset-0 bg-black opacity-40" />
       )}
       
       {/* Borough Title */}
@@ -80,8 +80,8 @@ export default function PlayerStats({ headerHidden = false }: PlayerStatsProps) 
         </div>
       )}
       
-      {/* Stats Panel - Positioned at bottom */}
-      <div className={`relative z-10 ${headerHidden ? "" : "absolute bottom-0 left-0 right-0 p-4 bg-black/70 backdrop-blur-sm"}`}>
+      {/* Stats Panel - Positioned at bottom with clear spacing from top */}
+      <div className={`relative z-10 ${headerHidden ? "" : "mt-auto p-4 bg-black/70 backdrop-blur-sm"}`}>
         {!headerHidden && <h3 className="text-sm uppercase tracking-wider mb-3 text-white/90">Player Stats</h3>}
         
         <div className="grid grid-cols-2 gap-4 text-white">
