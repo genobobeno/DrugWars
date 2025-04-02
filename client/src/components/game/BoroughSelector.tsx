@@ -53,7 +53,7 @@ export default function BoroughSelector({ onBoroughSelected, headerHidden = fals
               className="cursor-pointer"
             >
               <path 
-                d="M140,500 L170,470 L210,480 L250,500 L280,530 L280,570 L260,600 L230,620 L180,640 L150,630 L130,600 L120,560 Z" 
+                d="M50,570 L75,550 L100,540 L130,530 L160,530 L190,540 L220,560 L240,580 L250,610 L240,640 L220,670 L190,690 L150,700 L110,695 L80,680 L60,650 L50,620 Z" 
                 fill={gameState.currentBorough?.id === "staten_island" ? "rgba(79, 70, 229, 0.6)" : "rgba(255, 255, 255, 0.1)"}
                 stroke={gameState.currentBorough?.id === "staten_island" ? "#ffffff" : "#ffffff50"}
                 strokeWidth="3"
