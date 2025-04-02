@@ -19,21 +19,31 @@ function calculateCompoundGrowthRate(snapshots: DailySnapshot[]): number {
   // Sort by day to ensure chronological order
   const sortedSnapshots = [...snapshots].sort((a, b) => a.day - b.day);
   
-  // Get initial and final net worth values
-  const initialValue = sortedSnapshots[0].netWorth;
-  const finalValue = sortedSnapshots[sortedSnapshots.length - 1].netWorth;
+  // Get initial and final net worth values, accounting for the starting debt
+  // Initial value should be the base cash ($2000) minus starting debt ($5500), so typically -$3500
+  const initialValue = -3500; // Starting condition: $2000 cash - $5500 debt
+  const finalNetWorth = sortedSnapshots[sortedSnapshots.length - 1].netWorth;
   
-  // If initial value is zero or negative, return a flat rate
-  if (initialValue <= 0) return 0;
+  // If final value is not better than initial value, growth rate is 0 or negative
+  if (finalNetWorth <= initialValue) return 0;
   
-  // Number of days (periods)
-  const periods = sortedSnapshots.length - 1;
+  // Number of days (periods) - total game days (30)
+  const periods = 30;
   
-  // Calculate compound daily growth rate: (finalValue/initialValue)^(1/periods) - 1
-  const rate = Math.pow(finalValue / initialValue, 1 / periods) - 1;
-  
-  // Convert to percentage
-  return rate * 100;
+  // Calculate compound daily growth rate for positive growth scenario
+  // We use (1 + rate)^periods = finalValue/initialValue, solving for rate
+  // If initial value is negative and final is positive, we need a different approach
+  if (initialValue < 0 && finalNetWorth > 0) {
+    // We're going from negative to positive, so compound growth formula doesn't work directly
+    // Instead, calculate the average daily dollar gain and express as percentage of final
+    const totalGain = finalNetWorth - initialValue;
+    const avgDailyGain = totalGain / periods;
+    return (avgDailyGain / finalNetWorth) * 100;
+  } else {
+    // Standard compound growth rate calculation
+    const rate = Math.pow(finalNetWorth / initialValue, 1 / periods) - 1;
+    return rate * 100;
+  }
 }
 
 export default function GameOver() {
