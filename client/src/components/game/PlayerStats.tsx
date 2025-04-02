@@ -50,13 +50,14 @@ export default function PlayerStats({ headerHidden = false }: PlayerStatsProps) 
   
   return (
     <div className={`relative ${headerHidden ? "" : "rounded-md overflow-hidden mb-4"} h-full flex flex-col`} style={{ minHeight: '400px' }}>
-      {/* Borough Background Image - Full height */}
+      {/* Borough Background Image - Full width, bottom-justified */}
       {!headerHidden && (
         <div 
-          className="absolute inset-0 w-full h-full bg-cover bg-center"
+          className="absolute inset-0 w-full h-full bg-cover"
           style={{ 
             backgroundImage: `url('${backgroundImage}')`,
             opacity: 0.9, // More visible background
+            backgroundPosition: "center bottom",
           }}
         />
       )}
