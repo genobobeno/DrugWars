@@ -77,12 +77,24 @@ export default function MarketPlace({ selectedItemToSell, clearSelectedItem }: M
   }, [selectedItemToSell, gameState.inventory, gameState.items, gameState.currentPrices, clearSelectedItem]);
   
   // Filter available drugs
+  // Check if player has encountered the Mad Scientist NPC to introduce experimental drug
+  const hasMetMadScientist = gameState.eventHistory.some(event => 
+    event.npc?.id === "mad_scientist"
+  );
+
+  // Filter available drugs - hide experimental drug until player meets Mad Scientist
   const availableDrugs = gameState.items.filter(item => 
-    isDrugAvailable(item.id, gameState.currentPrices)
+    isDrugAvailable(item.id, gameState.currentPrices) && 
+    (item.id !== "experimental" || hasMetMadScientist)
   );
   
   // Handle item selection for buying
   const handleSelectItem = (item: MarketItem) => {
+    // Check if this is the experimental drug and player hasn't met the Mad Scientist
+    if (item.id === "experimental" && !hasMetMadScientist) {
+      return; // Shouldn't happen due to filtering, but an extra safety check
+    }
+    
     setSelectedItem(item);
     setSelectedInventoryItem(null);
     setTransactionType('buy');
@@ -110,6 +122,12 @@ export default function MarketPlace({ selectedItemToSell, clearSelectedItem }: M
   // Handle transaction (buy or sell)
   const handleTransaction = () => {
     if (!selectedItem) return;
+    
+    // Extra safety check for experimental drug
+    if (selectedItem.id === "experimental" && !hasMetMadScientist) {
+      setErrorMessage("You haven't discovered this drug yet");
+      return;
+    }
     
     try {
       if (transactionType === 'buy') {
