@@ -4,7 +4,6 @@ import {
   Banknote, 
   Landmark, 
   Heart, 
-  Shield,
   Zap,
   DollarSign 
 } from "lucide-react";
@@ -16,30 +15,31 @@ interface PlayerStatsProps {
 
 export default function PlayerStats({ headerHidden = false }: PlayerStatsProps) {
   const { gameState } = useGlobalGameState();
-  const [displayImage, setDisplayImage] = useState(""); // Will store image for selected borough
+  const [backgroundImage, setBackgroundImage] = useState<string>("");
   
-  // Update display image when borough changes
+  // Update background image when borough changes
   useEffect(() => {
-    // In the future, this would use actual images for each borough
     const getBoroughImage = (boroughId: string) => {
       switch (boroughId) {
-        case "manhattan":
-          return "Manhattan skyline"; // Placeholder for actual image
-        case "brooklyn":
-          return "Brooklyn Bridge"; // Placeholder for actual image
         case "bronx":
-          return "Yankee Stadium"; // Placeholder for actual image
+          return "/NY_Bronx.PNG";
+        case "brooklyn":
+          return "/NY_Brooklyn.PNG";
+        case "manhattan":
+          return "/NY_Manhattan.PNG";
         case "queens":
-          return "Flushing Meadows"; // Placeholder for actual image
+          return "/NY_Queens.PNG";
         case "staten_island":
-          return "Staten Island Ferry"; // Placeholder for actual image
+          return "/NY_StatenIsland.PNG";
         default:
-          return "New York City skyline"; // Default image
+          return "/NYBoroughs.webp"; // Default image of all NYC
       }
     };
     
     if (gameState.currentBorough) {
-      setDisplayImage(getBoroughImage(gameState.currentBorough.id));
+      setBackgroundImage(getBoroughImage(gameState.currentBorough.id));
+    } else {
+      setBackgroundImage("/NYBoroughs.webp");
     }
   }, [gameState.currentBorough]);
   
@@ -49,28 +49,47 @@ export default function PlayerStats({ headerHidden = false }: PlayerStatsProps) 
   const bankFormatted = gameState?.bank?.toLocaleString() || "0";
   
   return (
-    <div className={`${headerHidden ? "" : "bg-black"} text-white rounded-md overflow-hidden ${headerHidden ? "" : "mb-4"}`}>
-      {/* Borough image - only show if header is not hidden */}
+    <div className={`relative ${headerHidden ? "" : "rounded-md overflow-hidden mb-4"} h-full`}>
+      {/* Borough Background Image - Full height */}
       {!headerHidden && (
-        <div className="h-32 bg-gray-800 flex items-center justify-center text-center p-4">
-          <p className="text-muted italic">
+        <div 
+          className="absolute inset-0 w-full h-full bg-cover bg-center"
+          style={{ 
+            backgroundImage: `url('${backgroundImage}')`,
+            opacity: 0.6, // Semi-transparent background
+          }}
+        />
+      )}
+      
+      {/* Dark overlay to improve text readability */}
+      {!headerHidden && (
+        <div className="absolute inset-0 bg-black opacity-60" />
+      )}
+      
+      {/* Borough Title */}
+      {!headerHidden && (
+        <div className="relative z-10 pt-4 px-4 text-center">
+          <h2 className="text-xl font-bold text-white drop-shadow-md">
             {gameState?.currentBorough 
-              ? `You are in ${gameState.currentBorough.name}` 
-              : "Choose a borough to begin"}
+              ? `${gameState.currentBorough.name}` 
+              : "Select a Borough"}
+          </h2>
+          <p className="text-white/80 text-sm">
+            Day {gameState.currentDay} of {gameState.totalDays}
           </p>
         </div>
       )}
       
-      {/* Scoreboard */}
-      <div className="p-4">
-        {!headerHidden && <h3 className="text-sm uppercase tracking-wider mb-3 opacity-70">Player Stats</h3>}
+      {/* Stats Panel - Positioned at bottom */}
+      <div className={`relative z-10 ${headerHidden ? "" : "absolute bottom-0 left-0 right-0 p-4 bg-black/70 backdrop-blur-sm"}`}>
+        {!headerHidden && <h3 className="text-sm uppercase tracking-wider mb-3 text-white/90">Player Stats</h3>}
         
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-4 text-white">
           {/* Cash - Green */}
           <div className="flex items-center gap-2">
             <DollarSign className="h-5 w-5 text-green-500" />
             <div>
-              <div className="text-xs opacity-70">Cash</div>
+              <div className="text-xs text-white/70">Cash</div>
               <div className="font-bold text-green-500">${cashFormatted}</div>
             </div>
           </div>
@@ -79,7 +98,7 @@ export default function PlayerStats({ headerHidden = false }: PlayerStatsProps) 
           <div className="flex items-center gap-2">
             <Landmark className="h-5 w-5 text-green-500" />
             <div>
-              <div className="text-xs opacity-70">Bank (+{gameState?.bankInterestRate || 5}%)</div>
+              <div className="text-xs text-white/70">Bank (+{gameState?.bankInterestRate || 5}%)</div>
               <div className="font-bold text-green-500">${bankFormatted}</div>
             </div>
           </div>
@@ -88,7 +107,7 @@ export default function PlayerStats({ headerHidden = false }: PlayerStatsProps) 
           <div className="flex items-center gap-2">
             <Banknote className="h-5 w-5 text-red-500" />
             <div>
-              <div className="text-xs opacity-70">Debt (+{gameState?.debtInterestRate || 10}%)</div>
+              <div className="text-xs text-white/70">Debt (+{gameState?.debtInterestRate || 10}%)</div>
               <div className="font-bold text-red-500">${debtFormatted}</div>
             </div>
           </div>
@@ -97,7 +116,7 @@ export default function PlayerStats({ headerHidden = false }: PlayerStatsProps) 
           <div className="flex items-center gap-2">
             <Zap className="h-5 w-5 text-yellow-500" />
             <div>
-              <div className="text-xs opacity-70">Guns</div>
+              <div className="text-xs text-white/70">Guns</div>
               <div className="font-bold text-yellow-500">{gameState?.guns || 0}</div>
             </div>
           </div>
@@ -105,7 +124,7 @@ export default function PlayerStats({ headerHidden = false }: PlayerStatsProps) 
         
         {/* Health Bar */}
         <div className="mt-4">
-          <div className="flex justify-between text-xs mb-1">
+          <div className="flex justify-between text-xs mb-1 text-white">
             <div className="flex items-center">
               <Heart className="h-4 w-4 mr-1 text-blue-500" />
               <span>Health</span>
