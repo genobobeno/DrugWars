@@ -43,22 +43,38 @@ export default function MarketPlace({ selectedItemToSell, clearSelectedItem }: M
     setDrugEvents(events);
   }, [gameState.currentPrices]);
   
+  // State for sarcastic prompt
+  const [showNotAvailablePrompt, setShowNotAvailablePrompt] = useState(false);
+  const [notAvailableDrugName, setNotAvailableDrugName] = useState('');
+  
   // Update inventory item when selected from outside
   useEffect(() => {
     if (selectedItemToSell) {
       const item = gameState.inventory.find(item => item.id === selectedItemToSell);
       if (item && item.quantity > 0) {
         const marketItem = gameState.items.find(i => i.id === item.id);
-        if (marketItem) {
+        
+        // Check if the drug is available in the current market
+        const isDrugAvailableInMarket = isDrugAvailable(item.id, gameState.currentPrices);
+        
+        if (marketItem && isDrugAvailableInMarket) {
+          // Drug is available in the market, show normal selling dialog
           setSelectedInventoryItem(item);
           setSelectedItem(marketItem);
           setTransactionType('sell');
           // Set quantity to maximum available quantity
           setQuantity(item.quantity);
+        } else {
+          // Drug not available in the market, show sarcastic prompt
+          const drugName = gameState.items.find(i => i.id === item.id)?.name || 'this drug';
+          setNotAvailableDrugName(drugName);
+          setShowNotAvailablePrompt(true);
+          // Clear the selected item so it doesn't trigger the main dialog
+          clearSelectedItem();
         }
       }
     }
-  }, [selectedItemToSell, gameState.inventory, gameState.items]);
+  }, [selectedItemToSell, gameState.inventory, gameState.items, gameState.currentPrices, clearSelectedItem]);
   
   // Filter available drugs
   const availableDrugs = gameState.items.filter(item => 
@@ -172,6 +188,40 @@ export default function MarketPlace({ selectedItemToSell, clearSelectedItem }: M
   
   return (
     <>
+      {/* Sarcastic Prompt for Unavailable Drugs */}
+      <Dialog
+        open={showNotAvailablePrompt}
+        onOpenChange={(open) => {
+          if (!open) {
+            setShowNotAvailablePrompt(false);
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-red-500" />
+              Umm... Are You Serious?
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="py-4 text-base">
+            <p>Do you see <strong>{notAvailableDrugName}</strong> anywhere in this market?</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              You can only sell drugs that are currently available in this borough. Try traveling somewhere else, or wait for the market to change.
+            </p>
+          </div>
+          
+          <DialogFooter>
+            <Button 
+              onClick={() => setShowNotAvailablePrompt(false)}
+            >
+              My Bad
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Compact Drug Market Panel */}
       <Card className="mb-2">
         <CardHeader className="pb-2 pt-3">
