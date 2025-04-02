@@ -37,11 +37,11 @@ export default function BoroughSelector({ onBoroughSelected, headerHidden = fals
       )}
       
       <div className="relative h-[300px] w-full overflow-hidden">
-        {/* Background Map Image */}
+        {/* Background Map Image - Using user-provided NYBoroughs.webp */}
         <img 
-          src="/images/nyc-map-simple.svg" 
+          src="/images/NYBoroughs.webp" 
           alt="NYC Map"
-          className="w-full h-full object-contain bg-gray-900"
+          className="w-full h-full object-cover bg-gray-900"
         />
         
         {/* Interactive Overlays */}
