@@ -108,7 +108,7 @@ export default function Banking() {
               <Wallet className="h-3 w-3 mr-1" />
               <span className="text-xs font-medium">Cash:</span>
             </div>
-            <div className="text-xs font-semibold text-right">
+            <div className="text-xs font-semibold text-right text-green-500">
               ${gameState.cash.toLocaleString()}
             </div>
             <div className="text-right">
@@ -116,7 +116,7 @@ export default function Banking() {
                 onClick={openDepositDialog}
                 disabled={gameState.cash <= 0}
                 size="sm"
-                className="h-6 text-[10px] px-2"
+                className="h-6 text-[10px] w-20"
               >
                 Deposit
               </Button>
@@ -127,7 +127,7 @@ export default function Banking() {
               <PiggyBank className="h-3 w-3 mr-1" />
               <span className="text-xs font-medium">Bank:</span>
             </div>
-            <div className="text-xs font-semibold text-right">
+            <div className="text-xs font-semibold text-right text-green-500">
               ${gameState.bank.toLocaleString()}
               <span className="block text-[9px] text-muted-foreground">
                 ({gameState.bankInterestRate}% interest)
@@ -139,7 +139,7 @@ export default function Banking() {
                 disabled={gameState.bank <= 0}
                 size="sm"
                 variant="secondary"
-                className="h-6 text-[10px] px-2"
+                className="h-6 text-[10px] w-20"
               >
                 Withdraw
               </Button>
@@ -150,7 +150,7 @@ export default function Banking() {
               <Banknote className="h-3 w-3 mr-1" />
               <span className="text-xs font-medium">Debt:</span>
             </div>
-            <div className="text-xs font-semibold text-right">
+            <div className="text-xs font-semibold text-right text-red-500">
               ${gameState.debt.toLocaleString()}
               <span className="block text-[9px] text-muted-foreground">
                 ({gameState.debtInterestRate}% interest)
@@ -162,7 +162,7 @@ export default function Banking() {
                 disabled={gameState.debt <= 0 || gameState.cash <= 0}
                 size="sm"
                 variant="destructive"
-                className="h-6 text-[10px] px-2"
+                className="h-6 text-[10px] w-20"
               >
                 Pay Loan
               </Button>
