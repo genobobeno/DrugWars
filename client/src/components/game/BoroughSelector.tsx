@@ -41,13 +41,8 @@ export default function BoroughSelector({
         </div>
       )}
 
-      <div className="relative h-[350px] w-full overflow-hidden">
-        {/* Background Map Image - Using user-provided NYBoroughs.webp */}
-        <img
-          src="/images/NYBoroughs.webp"
-          alt="NYC Map"
-          className="w-full h-full object-contain bg-gray-900"
-        />
+      <div className="relative h-[350px] w-full overflow-hidden bg-gray-900">
+        {/* SVG Map Only - No background image */}
 
         {/* Interactive Overlays */}
         <div className="absolute inset-0 flex items-center justify-center">

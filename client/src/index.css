@@ -116,3 +116,12 @@ canvas {
   height: 100% !important;
   touch-action: none;
 }
+
+.label {
+  font-size: 20px;
+  fill: white;
+  pointer-events: none;
+  user-select: none;
+  font-weight: bold;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}

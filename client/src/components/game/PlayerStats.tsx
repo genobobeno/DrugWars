@@ -32,14 +32,14 @@ export default function PlayerStats({ headerHidden = false }: PlayerStatsProps) 
         case "staten_island":
           return "/images/boroughs/NY_StatenIsland.PNG";
         default:
-          return "/images/boroughs/NYBoroughs.webp"; // Default image of all NYC
+          return "/images/boroughs/NY_Manhattan.PNG"; // Default to Manhattan
       }
     };
     
     if (gameState.currentBorough) {
       setBackgroundImage(getBoroughImage(gameState.currentBorough.id));
     } else {
-      setBackgroundImage("/images/boroughs/NYBoroughs.webp");
+      setBackgroundImage("/images/boroughs/NY_Manhattan.PNG");
     }
   }, [gameState.currentBorough]);
   
