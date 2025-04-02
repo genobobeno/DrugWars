@@ -7,7 +7,6 @@ import Inventory from "./Inventory";
 import MarketPlace from "./MarketPlace";
 import EventDisplay from "./EventDisplay";
 import Banking from "./Banking";
-import CharacterStats from "./CharacterStats";
 import { getRandomEvent } from "../../lib/gameEvents";
 import { Borough } from "../../types/game";
 import { Button } from "../ui/button";
@@ -150,11 +149,10 @@ export default function MainGame() {
           />
         </div>
         
-        {/* Inventory, Banking, and Character Stats - Fixed 350px width */}
+        {/* Inventory and Banking - Fixed 350px width */}
         <div className="md:w-[350px] flex-shrink-0 space-y-2">
           <Inventory onSellClick={handleSellClick} />
           <Banking />
-          <CharacterStats gameState={gameState} />
         </div>
       </div>
       
