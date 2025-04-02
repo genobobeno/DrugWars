@@ -102,19 +102,7 @@ export default function MainGame() {
       <div className="grid grid-cols-1 md:grid-cols-7 gap-0 mb-3 bg-gray-900 rounded-lg overflow-hidden shadow-md">
         {/* Left Side - Day Counter and Player Stats */}
         <div className="p-3 space-y-2 md:col-span-3">
-          <div className="flex items-center justify-between">
-            <DayCounter />
-            <Button 
-              className="h-8 text-xs" 
-              onClick={handleEndDay}
-              size="sm"
-              variant="outline"
-            >
-              <CalendarDays className="mr-1 h-3 w-3" />
-              End Day
-              <ArrowRight className="ml-1 h-3 w-3" />
-            </Button>
-          </div>
+          <DayCounter />
           <PlayerStats headerHidden={true} />
         </div>
         
@@ -134,20 +122,10 @@ export default function MainGame() {
           />
         </div>
         
-        {/* Inventory, Banking, and End Day - Fixed 500px width */}
+        {/* Inventory and Banking - Fixed 500px width */}
         <div className="md:w-[500px] flex-shrink-0 space-y-2">
           <Inventory onSellClick={handleSellClick} />
           <Banking />
-          
-          <Button 
-            className="w-full" 
-            onClick={handleEndDay}
-            size="default"
-          >
-            <CalendarDays className="mr-1 h-4 w-4" />
-            End Day {gameState.currentDay}
-            <ArrowRight className="ml-1 h-3 w-3" />
-          </Button>
         </div>
       </div>
       

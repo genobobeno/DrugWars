@@ -1,7 +1,7 @@
 import { useGlobalGameState } from "../../lib/stores/useGlobalGameState";
 import { Borough } from "../../types/game";
 import { useAudio } from "../../lib/stores/useAudio";
-import { MapPin } from "lucide-react";
+import { MapPin, CalendarDays, ArrowRight } from "lucide-react";
 
 interface BoroughSelectorProps {
   onBoroughSelected: (borough: Borough) => void;
@@ -174,9 +174,11 @@ export default function BoroughSelector({
           )}
         </div>
 
-        {/* Instruction overlay */}
-        <div className="absolute bottom-2 right-2 px-3 py-1 bg-black/50 text-white rounded text-xs">
-          Click a borough to travel there
+        {/* Instruction overlay with day advancement info */}
+        <div className="absolute bottom-2 right-2 px-3 py-1 bg-black/75 text-white rounded text-xs flex items-center">
+          <CalendarDays className="h-3 w-3 mr-1" />
+          Travel to a borough advances the day (+1)
+          <ArrowRight className="h-3 w-3 ml-1" />
         </div>
       </div>
 
