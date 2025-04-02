@@ -382,7 +382,7 @@ export default function NPCEncounter({ onClose }: NPCEncounterProps) {
   
   return (
     <AlertDialog open={!!npc} onOpenChange={(open) => !open && onClose()}>
-      <AlertDialogContent className="max-w-2xl">
+      <AlertDialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <AlertDialogHeader>
           <div className="flex items-center gap-2 mb-2">
             <UserRound className="h-6 w-6 text-amber-500" />

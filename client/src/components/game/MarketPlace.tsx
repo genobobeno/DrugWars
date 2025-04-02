@@ -255,6 +255,9 @@ export default function MarketPlace({ selectedItemToSell, clearSelectedItem }: M
                       <td className="py-1">
                         <div className="flex items-center gap-1 flex-wrap">
                           <span className="text-xs">{item.name}</span>
+                          {item.id === "experimental" && (
+                            <Badge variant="default" className="text-[8px] h-4 px-1 bg-purple-500 hover:bg-purple-500">UNSTABLE</Badge>
+                          )}
                           {hasEvent && (
                             <Badge variant="destructive" className="text-[8px] h-4 px-1">HOT!</Badge>
                           )}
@@ -338,6 +341,12 @@ export default function MarketPlace({ selectedItemToSell, clearSelectedItem }: M
             {selectedItem && drugEvents[selectedItem.id] && (
               <div className="bg-red-500/10 p-2 rounded text-sm border border-red-200">
                 <strong className="text-red-600">ALERT:</strong> {drugEvents[selectedItem.id]}
+              </div>
+            )}
+            
+            {selectedItem && selectedItem.id === "experimental" && (
+              <div className="bg-purple-500/10 p-2 rounded text-sm border border-purple-200">
+                <strong className="text-purple-600">WARNING:</strong> This experimental drug has extremely volatile pricing. The value could skyrocket or plummet overnight. High risk, high reward!
               </div>
             )}
             

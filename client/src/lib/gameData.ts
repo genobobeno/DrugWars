@@ -47,6 +47,19 @@ export const boroughs: Borough[] = [
 // Define the drug items
 export const drugs: DrugItem[] = [
   {
+    id: "experimental",
+    name: "Experimental Drug",
+    category: "drugs",
+    description: "A mysterious experimental compound with unpredictable pricing.",
+    basePrice: 2000, // Base price to start from
+    volatility: 0.5, // Higher volatility for more random pricing
+    marketDailyProbability: 0.7, // 70% chance to appear in markets
+    dailyEventProbability: 0.2, // Higher chance of price events
+    eventDescription: "Word of this new experimental drug is spreading rapidly!",
+    noEventParameters: [600, 2000], // 30% to 100% of base price
+    eventParameters: [2000, 10000] // 100% to 500% of base price
+  },
+  {
     id: "acid",
     name: "Acid",
     category: "drugs",
@@ -216,6 +229,25 @@ export const items: MarketItem[] = drugs.map(drug => ({
 
 // Define NPC characters with special deals
 export const npcCharacters: NPCCharacter[] = [
+  {
+    id: "mad_scientist",
+    name: "Mad Scientist",
+    description: "A reclusive chemist who specializes in experimental compounds of dubious origin.",
+    personality: "Eccentric and brilliant, speaks rapidly about chemical formulas and neural pathways.",
+    favoredBoroughs: ["manhattan", "bronx"],
+    probability: 0.15,
+    deals: [
+      {
+        id: "scientist_experimental_deal",
+        type: "sell",
+        itemId: "experimental",
+        itemName: "Experimental Drug",
+        quantity: 10,
+        price: 1500, // Discount
+        description: "Fresh from the lab! This batch has... unique properties. Not FDA approved, obviously. Limited supply - 10 units at a special price."
+      }
+    ]
+  },
   {
     id: "jimmy_stash",
     name: "Jimmy Stash",
