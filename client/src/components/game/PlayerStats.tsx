@@ -79,29 +79,10 @@ export default function PlayerStats({ headerHidden = false }: PlayerStatsProps) 
       )}
       
       {/* Stats Panel - Positioned at bottom with clear spacing from top */}
-      <div className={`relative z-10 ${headerHidden ? "" : "mt-auto p-4 bg-black/70 backdrop-blur-sm"}`}>
-        {!headerHidden && <h3 className="text-sm uppercase tracking-wider mb-3 text-white/90">Player Stats</h3>}
+      <div className={`relative z-10 ${headerHidden ? "" : "mt-auto p-3 bg-black/70 backdrop-blur-sm"}`}>
+        {!headerHidden && <h3 className="text-sm uppercase tracking-wider mb-2 text-white/90">Player Stats</h3>}
         
-        {/* Health Bar - More prominent at the top */}
-        <div className="mb-4">
-          <div className="flex justify-between text-xs mb-1 text-white">
-            <div className="flex items-center">
-              <Heart className="h-4 w-4 mr-1 text-red-500" fill="currentColor" />
-              <span>Health</span>
-            </div>
-            <span>{gameState?.health || 100}%</span>
-          </div>
-          <Progress 
-            value={gameState?.health || 100} 
-            className={`h-3 bg-gray-700 [&>div]:${
-              gameState?.health > 70 ? "bg-green-500" :
-              gameState?.health > 40 ? "bg-yellow-500" :
-              "bg-red-500"
-            }`}
-          />
-        </div>
-        
-        <div className="grid grid-cols-2 gap-4 text-white">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-white mb-2">
           {/* Cash - Green */}
           <div className="flex items-center gap-2">
             <DollarSign className="h-5 w-5 text-green-500" />
@@ -137,6 +118,21 @@ export default function PlayerStats({ headerHidden = false }: PlayerStatsProps) 
               <div className="font-bold text-yellow-500">{gameState?.guns || 0}</div>
             </div>
           </div>
+        </div>
+        
+        {/* Health Bar - Back at the bottom in blue */}
+        <div className="mt-1">
+          <div className="flex justify-between text-xs mb-1 text-white">
+            <div className="flex items-center">
+              <Heart className="h-4 w-4 mr-1 text-blue-500" />
+              <span>Health</span>
+            </div>
+            <span>{gameState?.health || 100}%</span>
+          </div>
+          <Progress 
+            value={gameState?.health || 100} 
+            className="h-2 bg-gray-700 [&>div]:bg-blue-500"
+          />
         </div>
       </div>
     </div>
