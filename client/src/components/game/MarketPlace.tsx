@@ -192,9 +192,9 @@ export default function MarketPlace({ selectedItemToSell, clearSelectedItem }: M
           </div>
         </CardHeader>
         <CardContent className="py-0">
-          <div className="overflow-auto max-h-48 md:max-h-60 scrollbar-thin">
+          <div>
             <table className="w-full text-sm">
-              <thead className="border-b sticky top-0 bg-background z-10">
+              <thead className="border-b bg-background z-10">
                 <tr>
                   <th className="text-left py-1 font-medium text-xs">Drug</th>
                   <th className="text-right py-1 font-medium text-xs">Price</th>

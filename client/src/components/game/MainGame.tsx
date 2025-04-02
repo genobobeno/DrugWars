@@ -99,15 +99,15 @@ export default function MainGame() {
       }} />
       
       {/* Unified Header Section with Stats and Map - More Compact */}
-      <div className="grid grid-cols-1 md:grid-cols-7 gap-0 mb-3 bg-gray-900 rounded-lg overflow-hidden shadow-md">
-        {/* Left Side - Day Counter and Player Stats */}
-        <div className="p-3 space-y-2 md:col-span-3">
+      <div className="flex flex-col md:flex-row gap-0 mb-3 bg-gray-900 rounded-lg overflow-hidden shadow-md">
+        {/* Left Side - Day Counter and Player Stats - Wider */}
+        <div className="p-3 space-y-2 flex-grow">
           <DayCounter />
           <PlayerStats headerHidden={true} />
         </div>
         
-        {/* Right Side - Borough Selector Map */}
-        <div className="border-l border-gray-800 md:col-span-4">
+        {/* Right Side - Borough Selector Map - Fixed width */}
+        <div className="border-l border-gray-800 md:w-[500px] flex-shrink-0">
           <BoroughSelector onBoroughSelected={handleBoroughSelected} headerHidden={true} />
         </div>
       </div>
