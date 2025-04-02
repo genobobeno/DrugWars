@@ -33,13 +33,13 @@ const policeEvents: GameEvent[] = [
     type: "police",
     category: "travel",
     title: "Corrupt Officer",
-    description: "A police officer stopped you and hinted at wanting a bribe. You paid $500 to avoid any trouble.",
+    description: "A police officer stopped you and hinted at wanting a bribe of $500 to avoid any trouble.",
     effect: "negative",
     probability: 0.1,
     effects: [
       { type: "cash", value: -500 }
     ],
-    impactSummary: ["-$500 cash"]
+    impactSummary: ["-$500 cash (if you have it)"]
   }
 ];
 
@@ -101,14 +101,14 @@ const healthEvents: GameEvent[] = [
     type: "health",
     category: "travel",
     title: "Mugged!",
-    description: "You were attacked and robbed while traveling through a dangerous neighborhood.",
+    description: "You were attacked and robbed while traveling through a dangerous neighborhood. They took $200 from you if you had it.",
     effect: "negative",
     probability: 0.12,
     effects: [
       { type: "health", value: -15 },
       { type: "cash", value: -200 }
     ],
-    impactSummary: ["-15 health", "-$200 cash"]
+    impactSummary: ["-15 health", "-$200 cash (if you have it)"]
   },
   {
     id: "health_food_poisoning",
@@ -175,14 +175,14 @@ const debtEvents: GameEvent[] = [
     type: "debt",
     category: "daily",
     title: "Debt Collector",
-    description: "A debt collector tracked you down and demanded an immediate payment.",
+    description: "A debt collector tracked you down and demanded an immediate payment of $300. This reduces your debt by $200.",
     effect: "negative",
     probability: 0.1,
     effects: [
       { type: "cash", value: -300 },
       { type: "debt", value: -200 }
     ],
-    impactSummary: ["-$300 cash", "-$200 debt"]
+    impactSummary: ["-$300 cash (if you have it)", "-$200 debt"]
   },
   {
     id: "debt_interest_break",
@@ -206,13 +206,13 @@ const cashEvents: GameEvent[] = [
     type: "cash",
     category: "travel",
     title: "Lost Wallet",
-    description: "You lost your wallet while traveling. Some cash is gone.",
+    description: "You lost your wallet while traveling. You lost $150 cash.",
     effect: "negative",
     probability: 0.08,
     effects: [
       { type: "cash", value: -150 }
     ],
-    impactSummary: ["-$150 cash"]
+    impactSummary: ["-$150 cash (if you have it)"]
   },
   {
     id: "cash_gambling_win",
@@ -280,6 +280,25 @@ export function getRandomEvent(category: EventCategory, gameState: GameState): G
   if (eligibleEvents.length === 0) {
     return null;
   }
+  
+  // Filter out events that require cash if player doesn't have enough
+  eligibleEvents = eligibleEvents.filter(event => {
+    // Check if event has cash effects that deduct money
+    if (event.effects) {
+      const cashEffect = event.effects.find(effect => effect.type === 'cash' && effect.value < 0);
+      if (cashEffect) {
+        // For cash deduction events, ensure player has enough cash
+        return gameState.cash >= Math.abs(cashEffect.value);
+      }
+    }
+    
+    // Special case for police_bribe (id-based check as fallback)
+    if (event.id === "police_bribe" && gameState.cash < 500) {
+      return false;
+    }
+    
+    return true;
+  });
   
   // Check if we currently have a gun offer or police encounter
   // (to prevent both happening in the same day)

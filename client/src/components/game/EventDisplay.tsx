@@ -99,9 +99,15 @@ export default function EventDisplay({ onClose }: EventDisplayProps) {
   
   // Calculate bribe amount based on cash on hand (25-50% of cash)
   const bribeAmount = useMemo(() => {
-    if (!gameState) return 0;
-    const minBribe = Math.max(100, Math.floor(gameState.cash * 0.25));
+    if (!gameState || gameState.cash < 100) return 0;
+    
+    // Ensure minimum bribe is within player's cash limits
+    const minBribe = Math.min(Math.max(100, Math.floor(gameState.cash * 0.25)), gameState.cash);
     const maxBribe = Math.min(gameState.cash, Math.floor(gameState.cash * 0.5));
+    
+    // Handle case where min and max are the same (low cash)
+    if (minBribe >= maxBribe) return minBribe;
+    
     return Math.floor(Math.random() * (maxBribe - minBribe + 1)) + minBribe;
   }, [gameState?.cash, currentEvent?.id]);
   
@@ -381,22 +387,34 @@ export default function EventDisplay({ onClose }: EventDisplayProps) {
   };
   
   const handleBribePolice = () => {
-    if (!canAffordBribe) return;
+    if (!canAffordBribe || bribeAmount <= 0) return;
+    
+    // Get current game state
+    const { gameState: currentGameState } = useGlobalGameState.getState();
+    
+    // Double-check we have enough cash
+    if (currentGameState.cash < bribeAmount) {
+      setPoliceState(prevState => ({
+        ...prevState,
+        message: "You don't have enough cash to bribe the officers!"
+      }));
+      return;
+    }
     
     // Increase bribe amount if player has guns
     const effectiveBribeAmount = gameState.guns > 0 
       ? Math.floor(bribeAmount * 1.5) 
       : bribeAmount;
     
-    // Update game state with cash loss
-    const { gameState: currentGameState } = useGlobalGameState.getState();
-    const updatedCash = Math.max(0, currentGameState.cash - effectiveBribeAmount);
+    // Ensure we don't deduct more than what's available
+    const actualBribeAmount = Math.min(effectiveBribeAmount, currentGameState.cash);
+    const updatedCash = currentGameState.cash - actualBribeAmount;
     
     // Update local state
     setPoliceState(prevState => ({
       ...prevState,
       isComplete: true,
-      message: `You bribed the officers with $${effectiveBribeAmount} and they let you go.`
+      message: `You bribed the officers with $${actualBribeAmount} and they let you go.`
     }));
     
     // Update global state for cash
