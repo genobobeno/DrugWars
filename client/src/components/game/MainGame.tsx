@@ -124,18 +124,18 @@ export default function MainGame() {
         </div>
       </div>
       
-      {/* Main Game Area - Compacted */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-2">
-        {/* Market and Items - Wider */}
-        <div className="md:col-span-8">
+      {/* Main Game Area - Wider left panel, fixed-width right panel */}
+      <div className="flex flex-col md:flex-row gap-2">
+        {/* Market and Items - Wider and flexible */}
+        <div className="flex-grow">
           <MarketPlace 
             selectedItemToSell={selectedItemToSell} 
             clearSelectedItem={() => setSelectedItemToSell(null)} 
           />
         </div>
         
-        {/* Inventory, Banking, and End Day - Narrower */}
-        <div className="md:col-span-4 space-y-2">
+        {/* Inventory, Banking, and End Day - Fixed 500px width */}
+        <div className="md:w-[500px] flex-shrink-0 space-y-2">
           <Inventory onSellClick={handleSellClick} />
           <Banking />
           

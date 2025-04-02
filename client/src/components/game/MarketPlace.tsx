@@ -36,14 +36,14 @@ export default function MarketPlace({ selectedItemToSell, clearSelectedItem }: M
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [drugEvents, setDrugEvents] = useState<Record<string, string | null>>({});
   
-  // Initialize drug events
+  // Initialize drug events when currentPrices change (which happens when moving to a new day/location)
   useEffect(() => {
     const events: Record<string, string | null> = {};
     drugs.forEach(drug => {
       events[drug.id] = getDrugEventDescription(drug.id);
     });
     setDrugEvents(events);
-  }, [gameState.currentDay]);
+  }, [gameState.currentPrices]);
   
   // Update inventory item when selected from outside
   useEffect(() => {

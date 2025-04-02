@@ -1,10 +1,16 @@
 import { MarketItem, Borough, DrugItem } from "../types/game";
 import { drugs } from "./gameData";
 
+// Track active drug events
+const activeEvents: Record<string, boolean> = {};
+
 // Generate prices for all items based on location, drug availability, and events
 export function generatePrices(items: MarketItem[], currentBorough: Borough | null): Record<string, number> {
   const prices: Record<string, number> = {};
   const availableItems: Record<string, boolean> = {};
+  
+  // Reset active events when generating new prices
+  Object.keys(activeEvents).forEach(key => delete activeEvents[key]);
   
   // Process each drug to determine availability and pricing
   for (const drug of drugs) {
@@ -15,6 +21,8 @@ export function generatePrices(items: MarketItem[], currentBorough: Borough | nu
     if (isAvailable) {
       // Check if a special event is happening for this drug
       const isEvent = Math.random() < drug.dailyEventProbability;
+      // Store the event state for this drug
+      activeEvents[drug.id] = isEvent;
       
       let price: number;
       
@@ -42,6 +50,7 @@ export function generatePrices(items: MarketItem[], currentBorough: Borough | nu
     } else {
       // Drug is not available in this market
       prices[drug.id] = -1; // Use -1 to indicate unavailability
+      activeEvents[drug.id] = false; // No event for unavailable drugs
     }
   }
   
@@ -53,8 +62,8 @@ export function getDrugEventDescription(drugId: string): string | null {
   const drug = drugs.find(d => d.id === drugId);
   if (!drug) return null;
   
-  // Simulate if there's an event (this should match the logic in generatePrices)
-  const isEvent = Math.random() < drug.dailyEventProbability;
+  // Get the stored event state instead of generating a new random value
+  const isEvent = activeEvents[drugId] || false;
   
   return isEvent ? drug.eventDescription : null;
 }
