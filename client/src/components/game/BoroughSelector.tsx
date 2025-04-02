@@ -67,7 +67,7 @@ export default function BoroughSelector({ onBoroughSelected, headerHidden = fals
               className="cursor-pointer"
             >
               <path 
-                d="M330,380 L355,370 L375,380 L410,375 L430,380 L450,385 L470,400 L485,425 L490,450 L480,480 L460,510 L430,525 L390,530 L355,520 L330,500 L315,470 L320,430 L325,400 Z" 
+                d="M310,415 L340,400 L380,395 L420,400 L450,410 L465,430 L480,455 L490,485 L490,515 L475,545 L450,565 L420,580 L380,585 L350,580 L325,565 L310,545 L300,520 L295,495 L295,455 Z" 
                 fill={gameState.currentBorough?.id === "brooklyn" ? "rgba(79, 70, 229, 0.6)" : "rgba(255, 255, 255, 0.1)"}
                 stroke={gameState.currentBorough?.id === "brooklyn" ? "#ffffff" : "#ffffff50"}
                 strokeWidth="3"
@@ -81,7 +81,7 @@ export default function BoroughSelector({ onBoroughSelected, headerHidden = fals
               className="cursor-pointer"
             >
               <path 
-                d="M370,300 L400,280 L440,270 L470,275 L510,290 L540,320 L550,350 L545,380 L530,410 L500,430 L470,435 L440,430 L410,410 L390,390 L380,360 L375,330 Z" 
+                d="M360,320 L400,310 L440,305 L480,310 L520,320 L550,335 L580,360 L590,390 L590,420 L580,450 L555,475 L520,490 L480,495 L445,490 L420,475 L400,460 L380,435 L370,410 L360,380 L355,350 Z" 
                 fill={gameState.currentBorough?.id === "queens" ? "rgba(79, 70, 229, 0.6)" : "rgba(255, 255, 255, 0.1)"}
                 stroke={gameState.currentBorough?.id === "queens" ? "#ffffff" : "#ffffff50"}
                 strokeWidth="3"
@@ -95,7 +95,7 @@ export default function BoroughSelector({ onBoroughSelected, headerHidden = fals
               className="cursor-pointer"
             >
               <path 
-                d="M320,270 L335,260 L350,260 L355,280 L355,310 L350,340 L345,370 L340,400 L335,430 L325,450 L310,450 L305,420 L310,380 L315,340 L315,300 Z" 
+                d="M270,250 L290,245 L305,250 L310,275 L310,310 L305,350 L300,390 L295,430 L290,470 L280,510 L265,520 L250,515 L245,485 L250,450 L255,410 L260,370 L265,330 L270,290 Z" 
                 fill={gameState.currentBorough?.id === "manhattan" ? "rgba(79, 70, 229, 0.6)" : "rgba(255, 255, 255, 0.1)"}
                 stroke={gameState.currentBorough?.id === "manhattan" ? "#ffffff" : "#ffffff50"}
                 strokeWidth="3"
@@ -109,7 +109,7 @@ export default function BoroughSelector({ onBoroughSelected, headerHidden = fals
               className="cursor-pointer"
             >
               <path 
-                d="M310,230 L330,220 L355,215 L380,210 L410,210 L440,220 L460,230 L455,255 L440,270 L410,270 L385,275 L360,280 L340,280 L325,270 L315,250 Z" 
+                d="M260,185 L290,175 L330,170 L370,170 L410,175 L450,185 L480,200 L495,220 L490,245 L470,260 L430,270 L390,275 L350,275 L310,265 L285,250 L270,230 L260,210 Z" 
                 fill={gameState.currentBorough?.id === "bronx" ? "rgba(79, 70, 229, 0.6)" : "rgba(255, 255, 255, 0.1)"}
                 stroke={gameState.currentBorough?.id === "bronx" ? "#ffffff" : "#ffffff50"}
                 strokeWidth="3"
