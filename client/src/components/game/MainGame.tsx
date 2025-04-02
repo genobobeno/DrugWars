@@ -122,8 +122,8 @@ export default function MainGame() {
           />
         </div>
         
-        {/* Inventory and Banking - Fixed 450px width */}
-        <div className="md:w-[450px] flex-shrink-0 space-y-2">
+        {/* Inventory and Banking - Fixed 350px width */}
+        <div className="md:w-[350px] flex-shrink-0 space-y-2">
           <Inventory onSellClick={handleSellClick} />
           <Banking />
         </div>
