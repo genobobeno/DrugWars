@@ -8,7 +8,6 @@ import { Transaction, GameState } from '../../types/game';
 import { Check, Crown, X, AlertTriangle } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { Separator } from '../ui/separator';
-import CharacterStats from './CharacterStats';
 
 interface HighScoreFormProps {
   gameState: GameState;
@@ -191,14 +190,6 @@ export default function HighScoreForm({ gameState, onSubmitted, onCancel }: High
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
-            </div>
-            
-            <Separator className="my-4" />
-            
-            {/* Character Stats */}
-            <div className="bg-muted/30 rounded-lg p-4 mb-4">
-              <h3 className="text-sm font-medium mb-2">Character Progression</h3>
-              <CharacterStats gameState={gameState} mini={true} />
             </div>
             
             <Separator className="my-4" />

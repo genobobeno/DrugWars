@@ -256,7 +256,6 @@ export default function GameOver() {
                   </div>
                 </div>
               </div>
-              
 
             </div>
           </CardContent>
