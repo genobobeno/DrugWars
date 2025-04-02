@@ -125,6 +125,14 @@ export default function MainGame() {
         // Save the updated state to local storage
         localStorage.setItem("nyc-hustler-game-state", JSON.stringify(updatedGameState));
       }
+      
+      // If this is a daily random event (like police encounter or gun offer),
+      // progress the day after handling the event
+      if (currentEvent.category === 'daily') {
+        // Update prices and progress to next day
+        updatePrices();
+        progressDay();
+      }
     }
     
     // Clear the current event
