@@ -129,6 +129,21 @@ export default function GameOver() {
   const finalProfit = gameState.cash - gameState.startingCash - gameState.debt;
   const isWinner = finalProfit > 0;
   
+  // Calculate growth rate for sentiment
+  const growthRate = calculateCompoundGrowthRate(snapshots, {
+    cash: gameState.cash,
+    bank: gameState.bank,
+    debt: gameState.debt
+  });
+  
+  // Get growth rate sentiment based on percentage
+  const getGrowthRateSentiment = (rate: number): string => {
+    if (rate >= 20) return "Incredible investor! Your returns are exceptional.";
+    if (rate >= 10) return "Solid performance! You've got the basics down.";
+    if (rate >= 5) return "You need more practice to improve your strategy.";
+    return "Time to reconsider your approach or find a new career.";
+  };
+  
   // Generate achievement text based on game performance
   const achievementText = useMemo(() => {
     // No achievement for losers
@@ -236,17 +251,20 @@ export default function GameOver() {
               {isWinner ? (
                 <>
                   <ArrowUpCircle className="h-6 w-6 text-green-500" />
-                  Game Over - You Won!
+                  Game Over
                 </>
               ) : (
                 <>
                   <ArrowDownCircle className="h-6 w-6 text-red-500" />
-                  Game Over - You Lost
+                  Game Over
                 </>
               )}
             </CardTitle>
             <CardDescription className="text-center flex flex-col items-center gap-2">
               <span>You survived {gameState.currentDay} days in NYC</span>
+              <span className="font-medium text-base">
+                {getGrowthRateSentiment(growthRate)}
+              </span>
               {isWinner && achievementText && (
                 <span className="font-medium text-base text-primary">{achievementText}</span>
               )}
