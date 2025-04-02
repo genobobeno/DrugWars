@@ -75,6 +75,9 @@ export default function PlayerStats({ headerHidden = false }: PlayerStatsProps) 
               ? `${gameState.currentBorough.name}` 
               : "Select a Borough"}
           </h2>
+          <p className="text-white/80 text-sm">
+            Day {gameState.currentDay} of {gameState.totalDays}
+          </p>
         </div>
       )}
       
