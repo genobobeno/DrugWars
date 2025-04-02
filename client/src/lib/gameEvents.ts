@@ -43,6 +43,20 @@ const policeEvents: GameEvent[] = [
   }
 ];
 
+// Police encounter event - special interactive event
+const policeEncounterEvents: GameEvent[] = [
+  {
+    id: "police_encounter",
+    type: "police_encounter",
+    category: "daily",
+    title: "Police Encounter",
+    description: "You've encountered the police! What will you do?",
+    effect: "neutral",
+    probability: 0.15, // 15% daily chance
+    // This event will be handled with special UI in EventDisplay component
+  }
+];
+
 // Market events
 const marketEvents: GameEvent[] = [
   {
@@ -248,6 +262,7 @@ const gunEvents: GameEvent[] = [
 // Combine all events
 const allEvents = [
   ...policeEvents,
+  ...policeEncounterEvents,
   ...marketEvents,
   ...healthEvents, 
   ...inventoryEvents,

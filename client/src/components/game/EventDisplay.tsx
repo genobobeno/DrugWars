@@ -11,7 +11,9 @@ import {
   Shield, 
   ShieldAlert,
   Shirt,
-  Zap
+  Zap,
+  UserRoundX,
+  UserRoundCheck
 } from "lucide-react";
 import { 
   AlertDialog, 
@@ -30,6 +32,7 @@ import { setLocalStorage } from "../../lib/utils";
 // Icon mapping for event types
 const eventIcons: Record<string, LucideIcon> = {
   "police": ShieldAlert,
+  "police_encounter": ShieldAlert,
   "market": Banknote,
   "health": CircleAlert,
   "inventory": Package,
@@ -51,6 +54,20 @@ export default function EventDisplay({ onClose }: EventDisplayProps) {
   const { playHit, playSuccess } = useAudio();
   const [icon, setIcon] = useState<LucideIcon>(AlertCircle);
   const [iconColor, setIconColor] = useState("text-amber-500");
+  
+  // State for police encounter interaction
+  const [policeState, setPoliceState] = useState({
+    numCops: 0,
+    hasGuns: false,
+    gunType: "",
+    bribeAmount: 0,
+    isRunning: false,
+    isGunfight: false,
+    message: "",
+    isComplete: false,
+    healthLost: 0,
+    copsDefeated: 0
+  });
   
   // Generate a random price for trenchcoat between $100 and $300
   const trenchcoatPrice = useMemo(() => {
@@ -74,6 +91,19 @@ export default function EventDisplay({ onClose }: EventDisplayProps) {
   const gunType = useMemo(() => {
     return gunTypes[Math.floor(Math.random() * gunTypes.length)];
   }, [currentEvent?.id]);
+  
+  // Generate random number of cops between 2 and 11
+  const numCops = useMemo(() => {
+    return Math.floor(Math.random() * 10) + 2; // 2 to 11
+  }, [currentEvent?.id]);
+  
+  // Calculate bribe amount based on cash on hand (25-50% of cash)
+  const bribeAmount = useMemo(() => {
+    if (!gameState) return 0;
+    const minBribe = Math.max(100, Math.floor(gameState.cash * 0.25));
+    const maxBribe = Math.min(gameState.cash, Math.floor(gameState.cash * 0.5));
+    return Math.floor(Math.random() * (maxBribe - minBribe + 1)) + minBribe;
+  }, [gameState?.cash, currentEvent?.id]);
   
   useEffect(() => {
     if (!currentEvent) return;
@@ -132,7 +162,37 @@ export default function EventDisplay({ onClose }: EventDisplayProps) {
         setGameEvent(updatedEvent);
       }
     }
-  }, [currentEvent, playHit, playSuccess, trenchcoatPrice, spaceIncrease, gunPrice, gunType, setGameEvent]);
+    
+    // If this is a police encounter event, set up the police encounter
+    if (currentEvent.type === "police_encounter" && currentEvent.id === "police_encounter") {
+      if (!currentEvent.effects) {
+        // Update the police state
+        setPoliceState(prevState => ({
+          ...prevState,
+          numCops: numCops,
+          hasGuns: gameState.guns > 0,
+          gunType: gameState.guns > 0 ? gunTypes[Math.min(gameState.guns - 1, gunTypes.length - 1)] : "",
+          bribeAmount: bribeAmount,
+          message: ""
+        }));
+        
+        // Update the event description
+        const gunText = gameState.guns > 0 ? 
+          ` You have ${gameState.guns} gun(s) available to defend yourself.` : 
+          " You don't have any guns to defend yourself.";
+          
+        const updatedEvent = {
+          ...currentEvent,
+          title: `Police Confrontation: ${numCops} Officers`,
+          description: `You've encountered ${numCops} police officers patrolling the area!${gunText} What will you do?`,
+          effects: [],
+          impactSummary: []
+        };
+        
+        setGameEvent(updatedEvent);
+      }
+    }
+  }, [currentEvent, playHit, playSuccess, trenchcoatPrice, spaceIncrease, gunPrice, gunType, setGameEvent, numCops, bribeAmount, gameState?.guns]);
   
   // If no event, don't render
   if (!currentEvent) {
@@ -147,11 +207,20 @@ export default function EventDisplay({ onClose }: EventDisplayProps) {
   // Determine if this is a gun offer event
   const isGunOffer = currentEvent.type === "gun" && currentEvent.id === "gun_offer";
   
+  // Determine if this is a police encounter event
+  const isPoliceEncounter = currentEvent.type === "police_encounter" && currentEvent.id === "police_encounter";
+  
   // Check if player can afford the trenchcoat
   const canAffordTrenchcoat = isTrenchcoatOffer && gameState.cash >= trenchcoatPrice;
   
   // Check if player can afford the gun
   const canAffordGun = isGunOffer && gameState.cash >= gunPrice;
+  
+  // Check if player can afford the bribe
+  const canAffordBribe = isPoliceEncounter && gameState.cash >= bribeAmount;
+  
+  // Check if police encounter is complete
+  const isPoliceEncounterComplete = isPoliceEncounter && policeState.isComplete;
   
   const handleTrenchcoatPurchase = () => {
     if (isTrenchcoatOffer && canAffordTrenchcoat && currentEvent?.effects) {
@@ -205,6 +274,156 @@ export default function EventDisplay({ onClose }: EventDisplayProps) {
     onClose();
   };
   
+  // Police encounter handlers
+  const handleRunFromPolice = () => {
+    // 40% chance of successful escape
+    const escaped = Math.random() < 0.4;
+    
+    if (escaped) {
+      // Player escaped
+      setPoliceState(prevState => ({
+        ...prevState,
+        isRunning: true,
+        isComplete: true,
+        message: "You managed to escape from the police!"
+      }));
+      
+      playSuccess();
+    } else {
+      // Failed to escape
+      setPoliceState(prevState => ({
+        ...prevState,
+        isRunning: true,
+        message: "You failed to escape from the police. They're still after you!"
+      }));
+      
+      playHit();
+    }
+  };
+  
+  const handleGunfight = () => {
+    if (!gameState.guns) return;
+    
+    setPoliceState(prevState => ({
+      ...prevState,
+      isGunfight: true,
+      isRunning: false
+    }));
+    
+    // Determine number of shots based on guns owned
+    const numShots = Math.min(gameState.guns, 2);
+    
+    // Special case for uzi
+    const hasUzi = policeState.gunType === "uzi";
+    
+    // Calculate shots that hit (40% chance per shot)
+    let copsDefeated = 0;
+    
+    for (let i = 0; i < numShots; i++) {
+      if (Math.random() < 0.4) {
+        if (hasUzi && i === 0) {
+          // Uzi can take out 1-5 cops in one burst
+          copsDefeated += Math.floor(Math.random() * 5) + 1;
+        } else {
+          copsDefeated += 1;
+        }
+      }
+    }
+    
+    // Limit cops defeated to actual number of cops
+    copsDefeated = Math.min(copsDefeated, policeState.numCops);
+    
+    // Calculate cop shots that hit player (35% chance)
+    const remainingCops = policeState.numCops - copsDefeated;
+    let hitsTaken = 0;
+    
+    for (let i = 0; i < remainingCops; i++) {
+      if (Math.random() < 0.35) {
+        hitsTaken++;
+      }
+    }
+    
+    // Calculate health loss (12-20% per hit)
+    const healthLossPerHit = Math.floor(Math.random() * 9) + 12; // 12-20%
+    const totalHealthLoss = Math.min(hitsTaken * healthLossPerHit, 100);
+    
+    // Update game state with health loss
+    const { gameState: currentGameState } = useGlobalGameState.getState();
+    const updatedHealth = Math.max(0, currentGameState.health - totalHealthLoss);
+    
+    // Update local state
+    setPoliceState(prevState => ({
+      ...prevState,
+      copsDefeated,
+      healthLost: totalHealthLoss,
+      numCops: remainingCops,
+      isComplete: remainingCops === 0 || updatedHealth === 0,
+      message: remainingCops === 0
+        ? `You defeated all the police officers! You took ${totalHealthLoss}% damage.`
+        : updatedHealth === 0
+        ? "You've been critically injured and lost consciousness."
+        : `You defeated ${copsDefeated} officers, but ${remainingCops} remain. You took ${totalHealthLoss}% damage.`
+    }));
+    
+    // Update global state for health
+    const updatedGameState = {
+      ...currentGameState,
+      health: updatedHealth
+    };
+    
+    setLocalStorage("nyc-hustler-game-state", updatedGameState);
+    
+    if (remainingCops === 0) {
+      playSuccess();
+    } else {
+      playHit();
+    }
+  };
+  
+  const handleBribePolice = () => {
+    if (!canAffordBribe) return;
+    
+    // Increase bribe amount if player has guns
+    const effectiveBribeAmount = gameState.guns > 0 
+      ? Math.floor(bribeAmount * 1.5) 
+      : bribeAmount;
+    
+    // Update game state with cash loss
+    const { gameState: currentGameState } = useGlobalGameState.getState();
+    const updatedCash = Math.max(0, currentGameState.cash - effectiveBribeAmount);
+    
+    // Update local state
+    setPoliceState(prevState => ({
+      ...prevState,
+      isComplete: true,
+      message: `You bribed the officers with $${effectiveBribeAmount} and they let you go.`
+    }));
+    
+    // Update global state for cash
+    const updatedGameState = {
+      ...currentGameState,
+      cash: updatedCash
+    };
+    
+    setLocalStorage("nyc-hustler-game-state", updatedGameState);
+    
+    playSuccess();
+  };
+  
+  const handleCompletePoliceEncounter = () => {
+    // Add the police encounter to history if needed
+    if (currentEvent && !gameState.eventHistory.some(event => event.id === currentEvent.id)) {
+      const updatedGameState = {
+        ...gameState,
+        eventHistory: [...gameState.eventHistory, currentEvent]
+      };
+      
+      setLocalStorage("nyc-hustler-game-state", updatedGameState);
+    }
+    
+    onClose();
+  };
+  
   return (
     <AlertDialog open={!!currentEvent} onOpenChange={(open) => !open && onClose()}>
       <AlertDialogContent>
@@ -234,6 +453,15 @@ export default function EventDisplay({ onClose }: EventDisplayProps) {
             </div>
           )}
         </AlertDialogHeader>
+        
+        {/* Police encounter message */}
+        {isPoliceEncounter && policeState.message && (
+          <div className="bg-muted/30 p-3 rounded-md text-sm my-2">
+            <p className={policeState.isComplete && policeState.numCops === 0 ? "text-green-600" : policeState.healthLost > 0 ? "text-red-600" : ""}>
+              {policeState.message}
+            </p>
+          </div>
+        )}
         
         <AlertDialogFooter>
           {isTrenchcoatOffer ? (
@@ -266,6 +494,49 @@ export default function EventDisplay({ onClose }: EventDisplayProps) {
                 {canAffordGun ? `Buy for $${gunPrice}` : "Can't Afford"}
               </Button>
             </>
+          ) : isPoliceEncounter ? (
+            policeState.isComplete ? (
+              <Button onClick={handleCompletePoliceEncounter}>
+                Continue
+              </Button>
+            ) : policeState.isRunning && !policeState.isComplete ? (
+              <div className="flex flex-col w-full gap-2">
+                <Button onClick={handleRunFromPolice} className="w-full">
+                  Try to Run Again
+                </Button>
+                <Button 
+                  onClick={handleBribePolice} 
+                  disabled={!canAffordBribe}
+                  variant="outline"
+                  className="w-full"
+                >
+                  {canAffordBribe ? `Bribe for $${bribeAmount}` : "Can't Afford Bribe"}
+                </Button>
+              </div>
+            ) : (
+              <div className="flex flex-col w-full gap-2">
+                <Button onClick={handleRunFromPolice} className="w-full">
+                  Try to Run
+                </Button>
+                {gameState.guns > 0 && (
+                  <Button 
+                    onClick={handleGunfight} 
+                    variant="destructive"
+                    className="w-full"
+                  >
+                    Start Gunfight
+                  </Button>
+                )}
+                <Button 
+                  onClick={handleBribePolice} 
+                  disabled={!canAffordBribe}
+                  variant="outline"
+                  className="w-full"
+                >
+                  {canAffordBribe ? `Bribe for $${bribeAmount}` : "Can't Afford Bribe"}
+                </Button>
+              </div>
+            )
           ) : (
             <Button onClick={onClose}>
               Continue
