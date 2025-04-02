@@ -53,7 +53,7 @@ export default function BoroughSelector({ onBoroughSelected, headerHidden = fals
               className="cursor-pointer"
             >
               <path 
-                d="M180,520 L260,560 L250,640 L160,620 Z" 
+                d="M140,500 L170,470 L210,480 L250,500 L280,530 L280,570 L260,600 L230,620 L180,640 L150,630 L130,600 L120,560 Z" 
                 fill={gameState.currentBorough?.id === "staten_island" ? "rgba(79, 70, 229, 0.6)" : "rgba(255, 255, 255, 0.1)"}
                 stroke={gameState.currentBorough?.id === "staten_island" ? "#ffffff" : "#ffffff50"}
                 strokeWidth="3"
@@ -67,7 +67,7 @@ export default function BoroughSelector({ onBoroughSelected, headerHidden = fals
               className="cursor-pointer"
             >
               <path 
-                d="M355,430 L450,400 L500,490 L370,510 Z" 
+                d="M330,380 L355,370 L375,380 L410,375 L430,380 L450,385 L470,400 L485,425 L490,450 L480,480 L460,510 L430,525 L390,530 L355,520 L330,500 L315,470 L320,430 L325,400 Z" 
                 fill={gameState.currentBorough?.id === "brooklyn" ? "rgba(79, 70, 229, 0.6)" : "rgba(255, 255, 255, 0.1)"}
                 stroke={gameState.currentBorough?.id === "brooklyn" ? "#ffffff" : "#ffffff50"}
                 strokeWidth="3"
@@ -81,7 +81,7 @@ export default function BoroughSelector({ onBoroughSelected, headerHidden = fals
               className="cursor-pointer"
             >
               <path 
-                d="M440,290 L550,310 L500,440 L400,390 Z" 
+                d="M370,300 L400,280 L440,270 L470,275 L510,290 L540,320 L550,350 L545,380 L530,410 L500,430 L470,435 L440,430 L410,410 L390,390 L380,360 L375,330 Z" 
                 fill={gameState.currentBorough?.id === "queens" ? "rgba(79, 70, 229, 0.6)" : "rgba(255, 255, 255, 0.1)"}
                 stroke={gameState.currentBorough?.id === "queens" ? "#ffffff" : "#ffffff50"}
                 strokeWidth="3"
@@ -95,7 +95,7 @@ export default function BoroughSelector({ onBoroughSelected, headerHidden = fals
               className="cursor-pointer"
             >
               <path 
-                d="M340,270 L365,270 L345,410 L320,410 Z" 
+                d="M320,270 L335,260 L350,260 L355,280 L355,310 L350,340 L345,370 L340,400 L335,430 L325,450 L310,450 L305,420 L310,380 L315,340 L315,300 Z" 
                 fill={gameState.currentBorough?.id === "manhattan" ? "rgba(79, 70, 229, 0.6)" : "rgba(255, 255, 255, 0.1)"}
                 stroke={gameState.currentBorough?.id === "manhattan" ? "#ffffff" : "#ffffff50"}
                 strokeWidth="3"
@@ -109,7 +109,7 @@ export default function BoroughSelector({ onBoroughSelected, headerHidden = fals
               className="cursor-pointer"
             >
               <path 
-                d="M335,200 L430,210 L420,270 L340,260 Z" 
+                d="M310,230 L330,220 L355,215 L380,210 L410,210 L440,220 L460,230 L455,255 L440,270 L410,270 L385,275 L360,280 L340,280 L325,270 L315,250 Z" 
                 fill={gameState.currentBorough?.id === "bronx" ? "rgba(79, 70, 229, 0.6)" : "rgba(255, 255, 255, 0.1)"}
                 stroke={gameState.currentBorough?.id === "bronx" ? "#ffffff" : "#ffffff50"}
                 strokeWidth="3"
