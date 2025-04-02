@@ -240,7 +240,7 @@ export default function MarketPlace({ selectedItemToSell, clearSelectedItem }: M
                           className="h-5 text-[10px] px-1.5"
                           onClick={() => handleSelectItem(item)}
                         >
-                          {inInventory ? 'Trade' : 'Buy'}
+                          Buy
                         </Button>
                       </td>
                     </tr>
