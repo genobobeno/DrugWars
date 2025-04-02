@@ -48,6 +48,9 @@ interface GameStateStore {
   withdrawFromBank: (amount: number) => void;
   payDebt: (amount: number) => void;
   buyGuns: (quantity: number, pricePerGun?: number) => void;
+  updateCash: (amount: number) => void; // Add or remove cash
+  updateInventorySpace: (amount: number) => void; // Increase or decrease inventory space
+  addToEventHistory: (event: GameEvent) => void; // Add an event to the history
 }
 
 // Create Zustand store with all game logic
@@ -636,6 +639,66 @@ export const useGlobalGameState = create<GameStateStore>((set, get) => {
           ...gameState,
           cash: gameState.cash - cost,
           guns: gameState.guns + quantity
+        };
+        
+        // Save game state
+        setLocalStorage(STORAGE_KEY, updatedGameState);
+        
+        return { gameState: updatedGameState };
+      });
+    },
+    
+    // Update player's cash (add or remove)
+    updateCash: (amount: number) => {
+      set(state => {
+        const { gameState } = state;
+        const updatedCash = Math.max(0, gameState.cash + amount);
+        
+        const updatedGameState = {
+          ...gameState,
+          cash: updatedCash
+        };
+        
+        // Save game state
+        setLocalStorage(STORAGE_KEY, updatedGameState);
+        
+        return { gameState: updatedGameState };
+      });
+    },
+    
+    // Update player's inventory space
+    updateInventorySpace: (amount: number) => {
+      set(state => {
+        const { gameState } = state;
+        const updatedSpace = gameState.maxInventorySpace + amount;
+        
+        const updatedGameState = {
+          ...gameState,
+          maxInventorySpace: updatedSpace
+        };
+        
+        // Save game state
+        setLocalStorage(STORAGE_KEY, updatedGameState);
+        
+        console.log(`Updated inventory space: ${gameState.maxInventorySpace} → ${updatedSpace}`);
+        
+        return { gameState: updatedGameState };
+      });
+    },
+    
+    // Add an event to the history
+    addToEventHistory: (event: GameEvent) => {
+      set(state => {
+        const { gameState } = state;
+        
+        // Check if event is already in history
+        if (gameState.eventHistory.some(e => e.id === event.id)) {
+          return { gameState };
+        }
+        
+        const updatedGameState = {
+          ...gameState,
+          eventHistory: [...gameState.eventHistory, event]
         };
         
         // Save game state

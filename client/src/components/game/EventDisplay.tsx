@@ -236,17 +236,12 @@ export default function EventDisplay({ onClose }: EventDisplayProps) {
         { type: 'maxInventorySpace' as const, value: spaceIncrease }
       ];
       
-      // Apply all effects from the event
-      const updatedGameState = { ...gameState };
+      // Get the Zustand store actions for updating game state
+      const { updateCash, updateInventorySpace, addToEventHistory } = useGlobalGameState.getState();
       
-      effects.forEach(effect => {
-        if (effect.type === 'cash') {
-          updatedGameState.cash = Math.max(0, updatedGameState.cash + effect.value);
-        } else if (effect.type === 'maxInventorySpace') {
-          updatedGameState.maxInventorySpace += effect.value;
-        }
-        // Other effect types are handled by the global event system
-      });
+      // Apply effects directly using store actions
+      updateCash(-trenchcoatPrice); // Deduct cash
+      updateInventorySpace(spaceIncrease); // Increase inventory space
       
       // Make sure we have the current event with effects
       let eventToSave = currentEvent;
@@ -261,15 +256,15 @@ export default function EventDisplay({ onClose }: EventDisplayProps) {
         };
       }
       
-      // Update game state
-      setLocalStorage("nyc-hustler-game-state", updatedGameState);
-      
       // Add this event to event history if needed
       if (!gameState.eventHistory.some(event => event.id === currentEvent.id)) {
-        updatedGameState.eventHistory = [...updatedGameState.eventHistory, eventToSave];
+        addToEventHistory(eventToSave);
       }
       
+      // Play sound effect
       playSuccess();
+      
+      console.log(`Trenchcoat purchased: Increased inventory space by ${spaceIncrease} units`);
     }
     onClose();
   };
