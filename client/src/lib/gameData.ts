@@ -243,7 +243,7 @@ export const npcCharacters: NPCCharacter[] = [
         itemId: "experimental",
         itemName: "Experimental Drug",
         quantity: 10,
-        price: 1500, // Discount
+        price: 1200, // Cost per unit - $12,000 total for 10 units
         description: "Fresh from the lab! This batch has... unique properties. Not FDA approved, obviously. Limited supply - 10 units at a special price."
       }
     ]

@@ -63,6 +63,17 @@ export default function NPCEncounter({ onClose }: NPCEncounterProps) {
         // Check if player has enough cash and inventory space
         if (!deal.price || !deal.quantity) return false;
         
+        // Special handling for the experimental drug - add it to specific deal ID
+        if (deal.id === "scientist_experimental_deal") {
+          const totalCost = deal.price * deal.quantity;
+          const currentInventoryCount = gameState.inventory.reduce(
+            (sum, item) => sum + item.quantity, 0
+          );
+          const hasEnoughSpace = currentInventoryCount + deal.quantity <= gameState.maxInventorySpace;
+          
+          return gameState.cash >= totalCost && hasEnoughSpace;
+        }
+        
         const totalCost = deal.price * deal.quantity;
         const currentInventoryCount = gameState.inventory.reduce(
           (sum, item) => sum + item.quantity, 0
@@ -443,6 +454,13 @@ export default function NPCEncounter({ onClose }: NPCEncounterProps) {
                     {deal.id === 'shadow_space_upgrade' && 'Cost: $1500'}
                     {deal.id === 'doctor_health_pack' && 'Cost: $800'}
                     {deal.id === 'hustle_gun_deal' && 'Cost: $500'}
+                  </p>
+                )}
+                
+                {/* Special handling for experimental drug price display */}
+                {deal.id === 'scientist_experimental_deal' && deal.price && deal.quantity && (
+                  <p className="text-amber-600 text-sm font-semibold">
+                    Cost: ${(deal.price * deal.quantity).toLocaleString()}
                   </p>
                 )}
               </div>
