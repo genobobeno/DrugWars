@@ -12,6 +12,30 @@ import GameStatsFooter from "./GameStatsFooter";
 import { recordGameStarted } from "../../lib/api";
 import { DailySnapshot } from "../../lib/api";
 
+// Calculate compound daily growth rate (CDGR)
+function calculateCompoundGrowthRate(snapshots: DailySnapshot[]): number {
+  if (snapshots.length < 2) return 0;
+  
+  // Sort by day to ensure chronological order
+  const sortedSnapshots = [...snapshots].sort((a, b) => a.day - b.day);
+  
+  // Get initial and final net worth values
+  const initialValue = sortedSnapshots[0].netWorth;
+  const finalValue = sortedSnapshots[sortedSnapshots.length - 1].netWorth;
+  
+  // If initial value is zero or negative, return a flat rate
+  if (initialValue <= 0) return 0;
+  
+  // Number of days (periods)
+  const periods = sortedSnapshots.length - 1;
+  
+  // Calculate compound daily growth rate: (finalValue/initialValue)^(1/periods) - 1
+  const rate = Math.pow(finalValue / initialValue, 1 / periods) - 1;
+  
+  // Convert to percentage
+  return rate * 100;
+}
+
 export default function GameOver() {
   const { gameState, restartGame } = useGlobalGameState();
   const { playSuccess } = useAudio();
@@ -224,9 +248,7 @@ export default function GameOver() {
                 </div>
               </div>
               
-              <div className="h-[120px] mt-4">
-                <GameProgressChart snapshots={snapshots} />
-              </div>
+              {/* Game chart moved to after buttons */}
               
               <Separator />
               
@@ -253,6 +275,12 @@ export default function GameOver() {
                   <div className="flex justify-between">
                     <span>Random Events:</span>
                     <span>{gameState.eventHistory.length}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Compound Daily Growth:</span>
+                    <span>{snapshots.length > 1 ? 
+                      `${calculateCompoundGrowthRate(snapshots).toFixed(2)}%` : 
+                      'N/A'}</span>
                   </div>
                 </div>
               </div>
@@ -287,6 +315,11 @@ export default function GameOver() {
                 <RefreshCw className="mr-2 h-4 w-4" />
                 New Game
               </Button>
+            </div>
+            
+            {/* Game progress chart below buttons */}
+            <div className="h-[120px] mt-4">
+              <GameProgressChart snapshots={snapshots} />
             </div>
           </CardFooter>
         </Card>

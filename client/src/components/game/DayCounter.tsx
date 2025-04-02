@@ -37,8 +37,15 @@ export default function DayCounter() {
         {progressValue < 33 && "Just getting started with your empire"}
         {progressValue >= 33 && progressValue < 66 && "Halfway through your 30-day challenge"}
         {progressValue >= 66 && progressValue < 90 && "Final stretch! Make it count"}
-        {progressValue >= 90 && "Last few days! Go big or go home"}
+        {progressValue >= 90 && progressValue < 100 && "Last few days! Go big or go home"}
       </p>
+      
+      {/* Final day warning */}
+      {remainingDays === 0 && (
+        <div className="bg-red-900/50 border border-red-700 rounded-md mt-2 p-2 text-sm text-white">
+          <strong className="font-semibold">FINAL DAY!</strong> Sell your inventory to maximize profits before the game ends!
+        </div>
+      )}
     </div>
   );
 }
