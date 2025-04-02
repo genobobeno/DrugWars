@@ -7,13 +7,27 @@ import { useAudio } from "./lib/stores/useAudio";
 import "@fontsource/inter";
 import './index.css';
 
+// Storage key constant - must match the one in useGlobalGameState
+const STORAGE_KEY = 'nyc-hustler-game-state';
+
 // Main App component
 function App() {
-  const { gameState, initGame } = useGlobalGameState();
+  const { gameState, initGame, restartGame } = useGlobalGameState();
   const { setBackgroundMusic } = useAudio();
 
   // Initialize the game when the app starts
   useEffect(() => {
+    // Check for hard reset query parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const hardReset = urlParams.get('hardreset') === 'true';
+    
+    if (hardReset) {
+      console.log("HARD RESET: Clearing all game data");
+      localStorage.removeItem(STORAGE_KEY);
+      window.location.href = window.location.pathname; // Redirect without query params
+      return;
+    }
+    
     initGame();
 
     // Load and set background music
@@ -34,9 +48,24 @@ function App() {
       console.error("Failed to load audio:", error);
     }
   }, [initGame, setBackgroundMusic]);
+  
+  // Force restart function for development
+  const forceResetGame = () => {
+    console.log("FORCE RESET: Manually clearing all game data");
+    localStorage.removeItem(STORAGE_KEY);
+    window.location.reload();
+  };
 
   return (
     <div className="w-full h-full bg-background text-foreground">
+      {/* Add force reset button (only visible during development) */}
+      <button 
+        onClick={forceResetGame}
+        className="fixed top-2 right-2 z-50 bg-red-600 text-white px-2 py-1 text-xs rounded shadow"
+      >
+        Force Reset Game
+      </button>
+      
       <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>
         {gameState.phase === 'start' && <StartScreen />}
         {gameState.phase === 'playing' && <MainGame />}

@@ -57,11 +57,46 @@ export const useGlobalGameState = create<GameStateStore>((set, get) => {
     
     // Initialize the game
     initGame: () => {
+      // Check for forced reset first (for development purposes)
+      const urlParams = new URLSearchParams(window.location.search);
+      const forceReset = urlParams.get('reset') === 'true';
+      
+      if (forceReset) {
+        console.log("Forced reset detected. Clearing game state.");
+        localStorage.removeItem(STORAGE_KEY);
+        window.history.replaceState({}, document.title, window.location.pathname); // Remove query param
+        
+        // Generate fresh prices
+        const initialPrices = generatePrices(items, null);
+        set({
+          gameState: {
+            ...initialGameState,
+            currentPrices: initialPrices
+          },
+          currentEvent: null
+        });
+        return;
+      }
+      
       // Try to load saved game
       const savedState = getLocalStorage(STORAGE_KEY);
       
       if (savedState) {
-        set({ gameState: savedState });
+        // Verify the saved state has all necessary properties
+        if (savedState.items && savedState.currentPrices) {
+          set({ gameState: savedState });
+        } else {
+          // If saved state is corrupted, start fresh
+          console.log("Saved state is missing properties. Starting fresh.");
+          localStorage.removeItem(STORAGE_KEY);
+          const initialPrices = generatePrices(items, null);
+          set({
+            gameState: {
+              ...initialGameState,
+              currentPrices: initialPrices
+            }
+          });
+        }
       } else {
         // Generate initial prices
         const initialPrices = generatePrices(items, null);
