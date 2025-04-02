@@ -2,206 +2,308 @@ import { useState } from "react";
 import { 
   Card, 
   CardContent, 
-  CardDescription, 
   CardHeader, 
   CardTitle 
 } from "../ui/card";
 import { Button } from "../ui/button";
-import { Input } from "../ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from "../ui/dialog";
+import { Slider } from "../ui/slider";
 import { useGlobalGameState } from "../../lib/stores/useGlobalGameState";
 import { useAudio } from "../../lib/stores/useAudio";
-import { Landmark, PiggyBank, ArrowRightLeft, TrendingUp, Shield } from "lucide-react";
+import { Landmark, ArrowDown, Wallet, PiggyBank, Banknote } from "lucide-react";
 
 export default function Banking() {
   const { 
     gameState, 
     depositToBank, 
     withdrawFromBank,
-    buyGuns 
+    payDebt
   } = useGlobalGameState();
   const { playHit, playSuccess } = useAudio();
   
-  const [depositAmount, setDepositAmount] = useState<string>("");
-  const [withdrawAmount, setWithdrawAmount] = useState<string>("");
-  const [gunsAmount, setGunsAmount] = useState<string>("");
-  const [error, setError] = useState<string | null>(null);
+  // Dialog states
+  const [isDepositOpen, setIsDepositOpen] = useState(false);
+  const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
+  const [isPayLoanOpen, setIsPayLoanOpen] = useState(false);
   
-  // Handle deposit
+  // Amount states
+  const [depositAmount, setDepositAmount] = useState<number>(0);
+  const [withdrawAmount, setWithdrawAmount] = useState<number>(0);
+  const [payLoanAmount, setPayLoanAmount] = useState<number>(0);
+  
+  // Open deposit dialog
+  const openDepositDialog = () => {
+    setDepositAmount(gameState.cash); // Default to all cash
+    setIsDepositOpen(true);
+  };
+  
+  // Open withdraw dialog
+  const openWithdrawDialog = () => {
+    setWithdrawAmount(gameState.bank); // Default to all bank
+    setIsWithdrawOpen(true);
+  };
+  
+  // Open pay loan dialog
+  const openPayLoanDialog = () => {
+    // Default to minimum of cash or debt
+    const maxPayment = Math.min(gameState.cash, gameState.debt);
+    setPayLoanAmount(maxPayment);
+    setIsPayLoanOpen(true);
+  };
+  
+  // Execute deposit
   const handleDeposit = () => {
-    setError(null);
-    const amount = parseInt(depositAmount);
-    
-    if (isNaN(amount) || amount <= 0) {
-      setError("Please enter a valid amount");
-      return;
-    }
-    
     try {
-      depositToBank(amount);
-      setDepositAmount("");
+      depositToBank(depositAmount);
       playSuccess();
-    } catch (err: any) {
-      setError(err.message);
+      setIsDepositOpen(false);
+    } catch (err) {
       playHit();
     }
   };
   
-  // Handle withdraw
+  // Execute withdraw
   const handleWithdraw = () => {
-    setError(null);
-    const amount = parseInt(withdrawAmount);
-    
-    if (isNaN(amount) || amount <= 0) {
-      setError("Please enter a valid amount");
-      return;
-    }
-    
     try {
-      withdrawFromBank(amount);
-      setWithdrawAmount("");
+      withdrawFromBank(withdrawAmount);
       playSuccess();
-    } catch (err: any) {
-      setError(err.message);
+      setIsWithdrawOpen(false);
+    } catch (err) {
       playHit();
     }
   };
   
-  // Handle buying guns
-  const handleBuyGuns = () => {
-    setError(null);
-    const amount = parseInt(gunsAmount);
-    
-    if (isNaN(amount) || amount <= 0) {
-      setError("Please enter a valid amount");
-      return;
-    }
-    
+  // Execute pay loan
+  const handlePayLoan = () => {
     try {
-      buyGuns(amount);
-      setGunsAmount("");
+      payDebt(payLoanAmount);
       playSuccess();
-    } catch (err: any) {
-      setError(err.message);
+      setIsPayLoanOpen(false);
+    } catch (err) {
       playHit();
     }
   };
   
   return (
-    <Card className="w-full mb-2">
-      <CardHeader className="py-2 px-3">
-        <CardTitle className="flex items-center text-xs md:text-sm">
-          <Landmark className="mr-1 h-3 w-3 md:h-4 md:w-4" />
-          Financial
-          <span className="text-[10px] ml-auto">
-            Bank: ${gameState?.bank?.toLocaleString() || "0"} ({gameState.bankInterestRate}% daily)
-          </span>
-        </CardTitle>
-      </CardHeader>
-      
-      <CardContent className="p-2">
-        <Tabs defaultValue="banking" className="w-full">
-          <TabsList className="w-full mb-2 h-7">
-            <TabsTrigger value="banking" className="flex-1 text-[10px] h-7 py-0">
-              <PiggyBank className="h-3 w-3 mr-1" />
-              <span>Banking</span>
-            </TabsTrigger>
-            <TabsTrigger value="protection" className="flex-1 text-[10px] h-7 py-0">
-              <Shield className="h-3 w-3 mr-1" />
-              <span>Protection ({gameState?.guns || 0})</span>
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="banking" className="mt-0">
-            <div className="grid grid-cols-2 gap-2">
-              {/* Deposit */}
-              <div>
-                <div className="flex space-x-1">
-                  <Input
-                    type="number"
-                    placeholder="Deposit amount"
-                    value={depositAmount}
-                    onChange={(e) => setDepositAmount(e.target.value)}
-                    min={1}
-                    max={gameState?.cash || 0}
-                    className="h-7 text-xs"
-                  />
-                  <Button 
-                    onClick={handleDeposit}
-                    disabled={(gameState?.cash || 0) <= 0}
-                    size="sm"
-                    className="h-7 text-[10px] px-2"
-                  >
-                    <ArrowRightLeft className="h-3 w-3 mr-1" />
-                    Dep
-                  </Button>
-                </div>
-              </div>
-              
-              {/* Withdraw */}
-              <div>
-                <div className="flex space-x-1">
-                  <Input
-                    type="number"
-                    placeholder="Withdraw amount"
-                    value={withdrawAmount}
-                    onChange={(e) => setWithdrawAmount(e.target.value)}
-                    min={1}
-                    max={gameState?.bank || 0}
-                    className="h-7 text-xs"
-                  />
-                  <Button 
-                    onClick={handleWithdraw}
-                    disabled={(gameState?.bank || 0) <= 0}
-                    size="sm"
-                    variant="secondary"
-                    className="h-7 text-[10px] px-2"
-                  >
-                    <ArrowRightLeft className="h-3 w-3 mr-1" />
-                    W/D
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="protection" className="mt-0">
-            <div className="space-y-1">
-              <p className="text-[10px] text-muted-foreground">
-                Guns protect your drugs during events. $500 each.
-              </p>
-              
-              <div className="flex space-x-1">
-                <Input
-                  type="number"
-                  placeholder="Quantity"
-                  value={gunsAmount}
-                  onChange={(e) => setGunsAmount(e.target.value)}
-                  min={1}
-                  max={Math.floor((gameState?.cash || 0) / 500)}
-                  className="h-7 text-xs"
-                />
-                <Button 
-                  onClick={handleBuyGuns}
-                  disabled={(gameState?.cash || 0) < 500}
-                  variant="destructive"
-                  className="h-7 text-[10px] px-2"
-                >
-                  <Shield className="h-3 w-3 mr-1" />
-                  Buy
-                </Button>
-              </div>
-            </div>
-          </TabsContent>
-        </Tabs>
+    <>
+      <Card className="w-full mb-2">
+        <CardHeader className="py-2 px-3">
+          <CardTitle className="flex items-center text-xs md:text-sm">
+            <Landmark className="mr-1 h-3 w-3 md:h-4 md:w-4" />
+            Finances
+          </CardTitle>
+        </CardHeader>
         
-        {/* Error message */}
-        {error && (
-          <div className="mt-1 text-[10px] text-destructive">
-            {error}
+        <CardContent className="p-3">
+          <div className="grid grid-cols-3 gap-y-2 gap-x-1">
+            {/* Row 1: Cash */}
+            <div className="flex items-center">
+              <Wallet className="h-3 w-3 mr-1" />
+              <span className="text-xs font-medium">Cash:</span>
+            </div>
+            <div className="text-xs font-semibold text-right">
+              ${gameState.cash.toLocaleString()}
+            </div>
+            <div className="text-right">
+              <Button 
+                onClick={openDepositDialog}
+                disabled={gameState.cash <= 0}
+                size="sm"
+                className="h-6 text-[10px] px-2"
+              >
+                Deposit
+              </Button>
+            </div>
+            
+            {/* Row 2: Bank */}
+            <div className="flex items-center">
+              <PiggyBank className="h-3 w-3 mr-1" />
+              <span className="text-xs font-medium">Bank:</span>
+            </div>
+            <div className="text-xs font-semibold text-right">
+              ${gameState.bank.toLocaleString()}
+              <span className="block text-[9px] text-muted-foreground">
+                ({gameState.bankInterestRate}% interest)
+              </span>
+            </div>
+            <div className="text-right">
+              <Button 
+                onClick={openWithdrawDialog}
+                disabled={gameState.bank <= 0}
+                size="sm"
+                variant="secondary"
+                className="h-6 text-[10px] px-2"
+              >
+                Withdraw
+              </Button>
+            </div>
+            
+            {/* Row 3: Debt */}
+            <div className="flex items-center">
+              <Banknote className="h-3 w-3 mr-1" />
+              <span className="text-xs font-medium">Debt:</span>
+            </div>
+            <div className="text-xs font-semibold text-right">
+              ${gameState.debt.toLocaleString()}
+              <span className="block text-[9px] text-muted-foreground">
+                ({gameState.debtInterestRate}% interest)
+              </span>
+            </div>
+            <div className="text-right">
+              <Button 
+                onClick={openPayLoanDialog}
+                disabled={gameState.debt <= 0 || gameState.cash <= 0}
+                size="sm"
+                variant="destructive"
+                className="h-6 text-[10px] px-2"
+              >
+                Pay Loan
+              </Button>
+            </div>
           </div>
-        )}
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+      
+      {/* Deposit Dialog */}
+      <Dialog open={isDepositOpen} onOpenChange={setIsDepositOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Deposit Cash to Bank</DialogTitle>
+            <DialogDescription>
+              How much cash would you like to deposit?
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm">Amount:</span>
+              <span className="font-semibold">${depositAmount.toLocaleString()}</span>
+            </div>
+            
+            <Slider
+              value={[depositAmount]}
+              min={0}
+              max={gameState.cash}
+              step={1}
+              onValueChange={(values) => setDepositAmount(values[0])}
+            />
+            
+            <div className="flex justify-between mt-2 text-xs text-muted-foreground">
+              <span>$0</span>
+              <span>${gameState.cash.toLocaleString()}</span>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDepositOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleDeposit} disabled={depositAmount <= 0}>
+              OK
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Withdraw Dialog */}
+      <Dialog open={isWithdrawOpen} onOpenChange={setIsWithdrawOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Withdraw from Bank</DialogTitle>
+            <DialogDescription>
+              How much would you like to withdraw?
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm">Amount:</span>
+              <span className="font-semibold">${withdrawAmount.toLocaleString()}</span>
+            </div>
+            
+            <Slider
+              value={[withdrawAmount]}
+              min={0}
+              max={gameState.bank}
+              step={1}
+              onValueChange={(values) => setWithdrawAmount(values[0])}
+            />
+            
+            <div className="flex justify-between mt-2 text-xs text-muted-foreground">
+              <span>$0</span>
+              <span>${gameState.bank.toLocaleString()}</span>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsWithdrawOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleWithdraw} disabled={withdrawAmount <= 0}>
+              OK
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Pay Loan Dialog */}
+      <Dialog open={isPayLoanOpen} onOpenChange={setIsPayLoanOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Pay Off Loan</DialogTitle>
+            <DialogDescription>
+              How much would you like to pay?
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm">Amount:</span>
+              <span className="font-semibold">${payLoanAmount.toLocaleString()}</span>
+            </div>
+            
+            <Slider
+              value={[payLoanAmount]}
+              min={0}
+              max={Math.min(gameState.cash, gameState.debt)}
+              step={1}
+              onValueChange={(values) => setPayLoanAmount(values[0])}
+            />
+            
+            <div className="flex justify-between mt-2 text-xs text-muted-foreground">
+              <span>$0</span>
+              <span>${Math.min(gameState.cash, gameState.debt).toLocaleString()}</span>
+            </div>
+            
+            <div className="mt-4 text-xs bg-muted p-2 rounded">
+              <div className="flex justify-between mb-1">
+                <span>Remaining Debt:</span>
+                <span>${(gameState.debt - payLoanAmount).toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Remaining Cash:</span>
+                <span>${(gameState.cash - payLoanAmount).toLocaleString()}</span>
+              </div>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsPayLoanOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handlePayLoan} disabled={payLoanAmount <= 0}>
+              OK
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

@@ -46,6 +46,7 @@ interface GameStateStore {
   clearGameEvent: () => void;
   depositToBank: (amount: number) => void;
   withdrawFromBank: (amount: number) => void;
+  payDebt: (amount: number) => void;
   buyGuns: (quantity: number) => void;
 }
 
@@ -461,6 +462,34 @@ export const useGlobalGameState = create<GameStateStore>((set, get) => {
           ...gameState,
           cash: gameState.cash + amount,
           bank: gameState.bank - amount
+        };
+        
+        // Save game state
+        setLocalStorage(STORAGE_KEY, updatedGameState);
+        
+        return { gameState: updatedGameState };
+      });
+    },
+    
+    // Pay off debt
+    payDebt: (amount: number) => {
+      set(state => {
+        const { gameState } = state;
+        
+        // Check if player has enough cash
+        if (gameState.cash < amount) {
+          throw new Error("Not enough cash to pay debt");
+        }
+        
+        // Check if payment is not greater than debt
+        if (amount > gameState.debt) {
+          throw new Error("Payment amount exceeds debt");
+        }
+        
+        const updatedGameState = {
+          ...gameState,
+          cash: gameState.cash - amount,
+          debt: gameState.debt - amount
         };
         
         // Save game state
