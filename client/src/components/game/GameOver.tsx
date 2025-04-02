@@ -160,7 +160,7 @@ export default function GameOver() {
           
           <div className="mt-6 border rounded-lg p-4 bg-card">
             <h3 className="font-medium mb-3">Wealth Progression</h3>
-            <div className="h-[180px] w-full">
+            <div className="h-[200px] w-full">
               <GameProgressChart snapshots={snapshots} />
             </div>
           </div>
@@ -321,9 +321,9 @@ export default function GameOver() {
             </div>
             
             {/* Game progress chart below buttons */}
-            <div className="mt-6 border-t pt-4">
+            <div className="mt-6 border-t pt-4 w-full">
               <h3 className="font-medium mb-3">Wealth Progression</h3>
-              <div className="h-[180px] w-full">
+              <div className="h-[200px] w-full">
                 <GameProgressChart snapshots={snapshots} />
               </div>
             </div>
