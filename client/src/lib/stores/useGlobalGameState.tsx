@@ -205,7 +205,7 @@ export const useGlobalGameState = create<GameStateStore>((set, get) => {
           const existingItem = updatedInventory[existingItemIndex];
           const newTotalQuantity = existingItem.quantity + quantity;
           const newTotalCost = existingItem.avgPurchasePrice * existingItem.quantity + price * quantity;
-          const newAvgPrice = newTotalCost / newTotalQuantity;
+          const newAvgPrice = Math.round(newTotalCost / newTotalQuantity);
           
           updatedInventory[existingItemIndex] = {
             ...existingItem,
@@ -217,7 +217,7 @@ export const useGlobalGameState = create<GameStateStore>((set, get) => {
           updatedInventory.push({
             id: itemId,
             quantity,
-            avgPurchasePrice: price
+            avgPurchasePrice: Math.round(price)
           });
         }
         
@@ -321,11 +321,11 @@ export const useGlobalGameState = create<GameStateStore>((set, get) => {
         const { gameState } = state;
         const nextDay = gameState.currentDay + 1;
         
-        // Apply debt interest
-        const newDebt = gameState.debt * (1 + gameState.debtInterestRate / 100);
+        // Apply debt interest (rounded to nearest dollar)
+        const newDebt = Math.round(gameState.debt * (1 + gameState.debtInterestRate / 100));
         
-        // Apply bank interest
-        const newBank = gameState.bank * (1 + gameState.bankInterestRate / 100);
+        // Apply bank interest (rounded to nearest dollar)
+        const newBank = Math.round(gameState.bank * (1 + gameState.bankInterestRate / 100));
         
         // Check if game is over
         const updatedGameState = nextDay > gameState.totalDays

@@ -82,7 +82,7 @@ export default function Inventory({ onSellClick }: InventoryProps) {
                       <span className="truncate">Qty: {item.quantity}</span>
                       <span className="mx-1 inline-block">•</span>
                       <span className="truncate">
-                        ${item.avgPurchasePrice}
+                        ${Math.round(item.avgPurchasePrice)}
                       </span>
                       {priceChange !== 0 && (
                         <span className={`truncate ${priceChange > 0 ? "text-green-500" : "text-red-500"}`}>
