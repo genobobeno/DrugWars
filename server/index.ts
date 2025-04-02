@@ -42,9 +42,21 @@ app.use((req, res, next) => {
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
+    
+    // Log the error for debugging
+    console.error('Server error:', err);
+    
+    // Don't expose detailed database errors to clients
+    const safeMessage = err.code && err.code.startsWith('P') 
+      ? 'Database operation failed' 
+      : message;
 
-    res.status(status).json({ message });
-    throw err;
+    res.status(status).json({ message: safeMessage });
+    
+    // Only rethrow in development for better debugging
+    if (app.get("env") === "development") {
+      throw err;
+    }
   });
 
   // importantly only setup vite in development and after
