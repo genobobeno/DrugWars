@@ -9,6 +9,7 @@ import HighScoreForm from "./HighScoreForm";
 import HighScoreTable from "./HighScoreTable";
 import GameProgressChart from "./GameProgressChart";
 import GameStatsFooter from "./GameStatsFooter";
+import CharacterStats from "./CharacterStats";
 import { recordGameStarted } from "../../lib/api";
 import { DailySnapshot } from "../../lib/api";
 
@@ -255,6 +256,14 @@ export default function GameOver() {
                     <span>{gameState.eventHistory.length}</span>
                   </div>
                 </div>
+              </div>
+              
+              <Separator />
+              
+              {/* Character Stats */}
+              <div className="mt-4">
+                <h3 className="font-medium mb-2">Character Progression</h3>
+                <CharacterStats gameState={gameState} mini={true} />
               </div>
             </div>
           </CardContent>
