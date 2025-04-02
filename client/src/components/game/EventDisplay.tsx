@@ -320,13 +320,53 @@ export default function EventDisplay({ onClose }: EventDisplayProps) {
     const escaped = Math.random() < 0.4;
     
     if (escaped) {
+      // Get current game state
+      const { gameState: currentGameState } = useGlobalGameState.getState();
+      let droppedMessage = "";
+      let updatedGameState = { ...currentGameState };
+      
+      // Check if player has any inventory
+      const hasInventory = currentGameState.inventory.length > 0 && 
+                          currentGameState.inventory.some(item => item.quantity > 0);
+      
+      // 70% chance of dropping some drugs during escape
+      if (hasInventory && Math.random() < 0.7) {
+        // Calculate the percentage to drop (0-25%)
+        const percentageToDrop = Math.floor(Math.random() * 26); // 0-25%
+        
+        if (percentageToDrop > 0) {
+          // Update each inventory item
+          const updatedInventory = currentGameState.inventory.map(item => {
+            const dropAmount = Math.floor(item.quantity * percentageToDrop / 100);
+            return {
+              ...item,
+              quantity: Math.max(0, item.quantity - dropAmount)
+            };
+          })
+          .filter(item => item.quantity > 0); // Remove any empty items
+          
+          // Update game state with dropped inventory
+          updatedGameState = {
+            ...updatedGameState,
+            inventory: updatedInventory
+          };
+          
+          droppedMessage = percentageToDrop > 0 
+            ? " You dropped some drugs while running." 
+            : "";
+        }
+      }
+      
       // Player escaped
       setPoliceState(prevState => ({
         ...prevState,
         isRunning: true,
         isComplete: true,
-        message: "You managed to escape from the police!"
+        message: `You managed to escape from the police!${droppedMessage}`
       }));
+      
+      // Save updated game state
+      setLocalStorage("nyc-hustler-game-state", updatedGameState);
       
       playSuccess();
     } else {
