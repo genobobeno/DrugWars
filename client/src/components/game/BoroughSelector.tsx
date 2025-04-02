@@ -157,6 +157,21 @@ export default function BoroughSelector({
               strokeWidth="3"
               className="borough queens hover:stroke-white hover:fill-indigo-500/30 transition-all duration-200 cursor-pointer"
             />
+            <text x="70" y="400" className="label" textAnchor="middle">
+              Staten Island
+            </text>
+            <text x="270" y="330" className="label" textAnchor="middle">
+              Brooklyn
+            </text>
+            <text x="260" y="160" className="label" textAnchor="middle">
+              Manhattan
+            </text>
+            <text x="345" y="90" className="label" textAnchor="middle">
+              Bronx
+            </text>
+            <text x="390" y="250" className="label" textAnchor="middle">
+              Queens
+            </text>
           </svg>
         </div>
 

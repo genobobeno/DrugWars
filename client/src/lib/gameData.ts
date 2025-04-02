@@ -70,7 +70,7 @@ export const drugs: DrugItem[] = [
     dailyEventProbability: 0.1,
     eventDescription: "Cops made a massive cocaine bust! Demand is exploding!",
     noEventParameters: [15000, 30000],
-    eventParameters: [40000, 60000]
+    eventParameters: [40000, 130000]
   },
   {
     id: "hashish",
@@ -96,7 +96,7 @@ export const drugs: DrugItem[] = [
     dailyEventProbability: 0.11,
     eventDescription: "Police raided a local lab, prices of heroin are on fire!",
     noEventParameters: [5000, 14000],
-    eventParameters: [10000, 14000]
+    eventParameters: [25000, 50000]
   },
   {
     id: "ecstasy",

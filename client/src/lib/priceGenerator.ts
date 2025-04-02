@@ -60,12 +60,14 @@ export function generatePrices(
         }
       }
 
-      // Apply additional checks to keep drug prices within reasonable limits
-      // Get the maximum allowed price from the drug range parameters
-      const absoluteMax = isEvent ? Math.max(...drug.eventParameters) : Math.max(...drug.noEventParameters);
-      
-      // Ensure price doesn't exceed the maximum for this drug
-      price = Math.min(price, absoluteMax);
+      // Enforce strict limits based on the drug's event status
+      if (isEvent) {
+        // If it's an event, use event parameters as strict min/max
+        price = Math.min(Math.max(price, drug.eventParameters[0]), drug.eventParameters[1]);
+      } else {
+        // If it's not an event, use normal parameters as strict min/max
+        price = Math.min(Math.max(price, drug.noEventParameters[0]), drug.noEventParameters[1]);
+      }
       
       // Round to nearest dollar
       prices[drug.id] = Math.round(price);
