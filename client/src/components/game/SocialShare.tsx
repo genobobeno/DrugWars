@@ -7,13 +7,28 @@ interface SocialShareProps {
   score: number;
   daysPlayed: number;
   achievement?: string;
+  growthRate?: number;  // Added compound daily growth rate
 }
 
-export default function SocialShare({ score, daysPlayed, achievement }: SocialShareProps) {
+export default function SocialShare({ score, daysPlayed, achievement, growthRate }: SocialShareProps) {
   // Generate sharing text based on game results
   const getShareText = (): string => {
-    const baseText = `I just scored $${score.toLocaleString()} after ${daysPlayed} days in NYC Hustler!`;
-    return achievement ? `${baseText} ${achievement}` : baseText;
+    let baseText = `I just scored $${score.toLocaleString()} after ${daysPlayed} days in NYC Hustler!`;
+    
+    // Add compound growth rate if available
+    if (growthRate !== undefined) {
+      baseText += ` (${growthRate.toFixed(2)}% daily growth)`;
+    }
+    
+    // Add achievement text if available
+    if (achievement) {
+      baseText += ` ${achievement}`;
+    }
+    
+    // Add website URL
+    baseText += " Play at drugwars.replit.app";
+    
+    return baseText;
   };
 
   // Generate hashtags for social media
@@ -21,11 +36,16 @@ export default function SocialShare({ score, daysPlayed, achievement }: SocialSh
     return "NYCHustler,DrugWars,GameAchievement";
   };
 
+  // Use fixed website URL for sharing
+  const getWebsiteUrl = (): string => {
+    return "https://drugwars.replit.app";
+  };
+
   // Handle Twitter sharing
   const shareOnTwitter = () => {
     const text = encodeURIComponent(getShareText());
     const hashtags = getHashtags();
-    const url = encodeURIComponent(window.location.href);
+    const url = encodeURIComponent(getWebsiteUrl());
     window.open(
       `https://twitter.com/intent/tweet?text=${text}&hashtags=${hashtags}&url=${url}`,
       "_blank"
@@ -34,14 +54,14 @@ export default function SocialShare({ score, daysPlayed, achievement }: SocialSh
 
   // Handle Facebook sharing
   const shareOnFacebook = () => {
-    const url = encodeURIComponent(window.location.href);
+    const url = encodeURIComponent(getWebsiteUrl());
     window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, "_blank");
   };
 
   // Handle LinkedIn sharing
   const shareOnLinkedIn = () => {
     const text = encodeURIComponent(getShareText());
-    const url = encodeURIComponent(window.location.href);
+    const url = encodeURIComponent(getWebsiteUrl());
     window.open(
       `https://www.linkedin.com/sharing/share-offsite/?url=${url}&summary=${text}`,
       "_blank"
@@ -50,7 +70,7 @@ export default function SocialShare({ score, daysPlayed, achievement }: SocialSh
 
   // Copy to clipboard
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(getShareText() + " " + window.location.href)
+    navigator.clipboard.writeText(getShareText())
       .then(() => {
         toast.success("Copied to clipboard!");
       })

@@ -374,6 +374,11 @@ export default function GameOver() {
                   score={finalScore}
                   daysPlayed={gameState.currentDay}
                   achievement={achievementText}
+                  growthRate={calculateCompoundGrowthRate(snapshots, {
+                    cash: gameState.cash,
+                    bank: gameState.bank,
+                    debt: gameState.debt
+                  })}
                 />
               </div>
             )}
