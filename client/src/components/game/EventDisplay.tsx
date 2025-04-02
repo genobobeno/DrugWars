@@ -128,17 +128,14 @@ export default function EventDisplay({ onClose }: EventDisplayProps) {
       setIconColor("text-amber-500");
     }
     
-    // If this is a trenchcoat event, add the price to the description
+    // If this is a trenchcoat event, update the description
     if (currentEvent.type === "trenchcoat" && currentEvent.id === "trenchcoat_offer") {
-      // Add effects with dynamic price if not already added
-      if (!currentEvent.effects) {
+      // Only update the description if necessary
+      if (!currentEvent.description.includes(`$${trenchcoatPrice}`)) {
         const updatedEvent = {
           ...currentEvent,
           description: `A shady vendor offers you a larger trenchcoat with more pockets for $${trenchcoatPrice}. It will increase your inventory capacity by ${spaceIncrease} slots.`,
-          effects: [
-            { type: 'cash' as const, value: -trenchcoatPrice },
-            { type: 'maxInventorySpace' as const, value: spaceIncrease }
-          ],
+          // Don't add effects here - they will be applied in the purchase handler
           impactSummary: [
             `-$${trenchcoatPrice} cash`,
             `+${spaceIncrease} inventory capacity`
@@ -148,18 +145,15 @@ export default function EventDisplay({ onClose }: EventDisplayProps) {
       }
     }
     
-    // If this is a gun offer event, add gun type and price to the description
+    // If this is a gun offer event, update the description
     if (currentEvent.type === "gun" && currentEvent.id === "gun_offer") {
-      if (!currentEvent.effects) {
+      if (!currentEvent.description.includes(`$${gunPrice}`)) {
         const capitalizedGunType = gunType.charAt(0).toUpperCase() + gunType.slice(1);
         const updatedEvent = {
           ...currentEvent,
           title: `${capitalizedGunType} Offer`,
           description: `A weapons dealer offers you a ${gunType} for $${gunPrice}. This will help protect you on the streets.`,
-          effects: [
-            { type: 'cash' as const, value: -gunPrice },
-            { type: 'guns' as const, value: 1 }
-          ],
+          // Don't add effects here - they will be applied in the purchase handler
           impactSummary: [
             `-$${gunPrice} cash`,
             "+1 gun for protection"
@@ -229,11 +223,17 @@ export default function EventDisplay({ onClose }: EventDisplayProps) {
   const isPoliceEncounterComplete = isPoliceEncounter && policeState.isComplete;
   
   const handleTrenchcoatPurchase = () => {
-    if (isTrenchcoatOffer && canAffordTrenchcoat && currentEvent?.effects) {
+    if (isTrenchcoatOffer && canAffordTrenchcoat) {
+      // Create effects for the trenchcoat purchase
+      const effects = [
+        { type: 'cash' as const, value: -trenchcoatPrice },
+        { type: 'maxInventorySpace' as const, value: spaceIncrease }
+      ];
+      
       // Apply all effects from the event
       const updatedGameState = { ...gameState };
       
-      currentEvent.effects.forEach(effect => {
+      effects.forEach(effect => {
         if (effect.type === 'cash') {
           updatedGameState.cash = Math.max(0, updatedGameState.cash + effect.value);
         } else if (effect.type === 'maxInventorySpace') {
@@ -242,12 +242,25 @@ export default function EventDisplay({ onClose }: EventDisplayProps) {
         // Other effect types are handled by the global event system
       });
       
+      // Make sure we have the current event with effects
+      let eventToSave = currentEvent;
+      if (!currentEvent.effects) {
+        eventToSave = {
+          ...currentEvent,
+          effects: effects,
+          impactSummary: [
+            `-$${trenchcoatPrice} cash`,
+            `+${spaceIncrease} inventory capacity`
+          ]
+        };
+      }
+      
       // Update game state
       setLocalStorage("nyc-hustler-game-state", updatedGameState);
       
       // Add this event to event history if needed
       if (!gameState.eventHistory.some(event => event.id === currentEvent.id)) {
-        updatedGameState.eventHistory = [...updatedGameState.eventHistory, currentEvent];
+        updatedGameState.eventHistory = [...updatedGameState.eventHistory, eventToSave];
       }
       
       playSuccess();
@@ -256,16 +269,37 @@ export default function EventDisplay({ onClose }: EventDisplayProps) {
   };
   
   const handleGunPurchase = () => {
-    if (isGunOffer && canAffordGun && currentEvent?.effects) {
+    if (isGunOffer && canAffordGun) {
       try {
+        // Create effects for the gun purchase
+        const effects = [
+          { type: 'cash' as const, value: -gunPrice },
+          { type: 'guns' as const, value: 1 }
+        ];
+        
         // Use the global buyGuns function with dynamic price
         const { buyGuns } = useGlobalGameState.getState();
         buyGuns(1, gunPrice);
         
+        // Make sure we have the current event with effects
+        let eventToSave = currentEvent;
+        if (!currentEvent.effects) {
+          const capitalizedGunType = gunType.charAt(0).toUpperCase() + gunType.slice(1);
+          eventToSave = {
+            ...currentEvent,
+            title: `${capitalizedGunType} Purchase`,
+            effects: effects,
+            impactSummary: [
+              `-$${gunPrice} cash`,
+              "+1 gun for protection"
+            ]
+          };
+        }
+        
         // Add this event to event history if needed
         const { gameState } = useGlobalGameState.getState();
         if (!gameState.eventHistory.some(event => event.id === currentEvent.id)) {
-          const updatedHistory = [...gameState.eventHistory, currentEvent];
+          const updatedHistory = [...gameState.eventHistory, eventToSave];
           setLocalStorage("nyc-hustler-game-state", {
             ...gameState,
             eventHistory: updatedHistory
