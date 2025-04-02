@@ -46,76 +46,56 @@ export default function BoroughSelector({ onBoroughSelected, headerHidden = fals
         
         {/* Interactive Overlays */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <svg viewBox="0 0 800 800" className="w-full h-full">
+          <svg viewBox="0 0 500 500" className="w-full h-full overlay">
             {/* Staten Island Clickable Area */}
-            <g 
+            <polygon 
+              points="50,400 80,430 100,410 90,380 60,370" 
               onClick={() => handleSelect(gameState.boroughs.find(b => b.id === "staten_island")!)}
-              className="cursor-pointer"
-            >
-              <path 
-                d="M50,570 L75,550 L100,540 L130,530 L160,530 L190,540 L220,560 L240,580 L250,610 L240,640 L220,670 L190,690 L150,700 L110,695 L80,680 L60,650 L50,620 Z" 
-                fill={gameState.currentBorough?.id === "staten_island" ? "rgba(79, 70, 229, 0.6)" : "rgba(255, 255, 255, 0.1)"}
-                stroke={gameState.currentBorough?.id === "staten_island" ? "#ffffff" : "#ffffff50"}
-                strokeWidth="3"
-                className="hover:stroke-white hover:fill-indigo-500/30 transition-all duration-200"
-              />
-            </g>
+              fill={gameState.currentBorough?.id === "staten_island" ? "rgba(79, 70, 229, 0.6)" : "rgba(255, 255, 255, 0.1)"}
+              stroke={gameState.currentBorough?.id === "staten_island" ? "#ffffff" : "#ffffff50"}
+              strokeWidth="3"
+              className="borough staten-island hover:stroke-white hover:fill-indigo-500/30 transition-all duration-200 cursor-pointer"
+            />
             
             {/* Brooklyn Clickable Area */}
-            <g 
+            <polygon 
+              points="220,400 250,410 270,380 260,350 230,360 210,380" 
               onClick={() => handleSelect(gameState.boroughs.find(b => b.id === "brooklyn")!)}
-              className="cursor-pointer"
-            >
-              <path 
-                d="M310,415 L340,400 L380,395 L420,400 L450,410 L465,430 L480,455 L490,485 L490,515 L475,545 L450,565 L420,580 L380,585 L350,580 L325,565 L310,545 L300,520 L295,495 L295,455 Z" 
-                fill={gameState.currentBorough?.id === "brooklyn" ? "rgba(79, 70, 229, 0.6)" : "rgba(255, 255, 255, 0.1)"}
-                stroke={gameState.currentBorough?.id === "brooklyn" ? "#ffffff" : "#ffffff50"}
-                strokeWidth="3"
-                className="hover:stroke-white hover:fill-indigo-500/30 transition-all duration-200"
-              />
-            </g>
-            
-            {/* Queens Clickable Area */}
-            <g 
-              onClick={() => handleSelect(gameState.boroughs.find(b => b.id === "queens")!)}
-              className="cursor-pointer"
-            >
-              <path 
-                d="M360,320 L400,310 L440,305 L480,310 L520,320 L550,335 L580,360 L590,390 L590,420 L580,450 L555,475 L520,490 L480,495 L445,490 L420,475 L400,460 L380,435 L370,410 L360,380 L355,350 Z" 
-                fill={gameState.currentBorough?.id === "queens" ? "rgba(79, 70, 229, 0.6)" : "rgba(255, 255, 255, 0.1)"}
-                stroke={gameState.currentBorough?.id === "queens" ? "#ffffff" : "#ffffff50"}
-                strokeWidth="3"
-                className="hover:stroke-white hover:fill-indigo-500/30 transition-all duration-200"
-              />
-            </g>
+              fill={gameState.currentBorough?.id === "brooklyn" ? "rgba(79, 70, 229, 0.6)" : "rgba(255, 255, 255, 0.1)"}
+              stroke={gameState.currentBorough?.id === "brooklyn" ? "#ffffff" : "#ffffff50"}
+              strokeWidth="3"
+              className="borough brooklyn hover:stroke-white hover:fill-indigo-500/30 transition-all duration-200 cursor-pointer"
+            />
             
             {/* Manhattan Clickable Area */}
-            <g 
+            <polygon 
+              points="200,200 210,180 220,140 215,130 190,160 185,180" 
               onClick={() => handleSelect(gameState.boroughs.find(b => b.id === "manhattan")!)}
-              className="cursor-pointer"
-            >
-              <path 
-                d="M270,250 L290,245 L305,250 L310,275 L310,310 L305,350 L300,390 L295,430 L290,470 L280,510 L265,520 L250,515 L245,485 L250,450 L255,410 L260,370 L265,330 L270,290 Z" 
-                fill={gameState.currentBorough?.id === "manhattan" ? "rgba(79, 70, 229, 0.6)" : "rgba(255, 255, 255, 0.1)"}
-                stroke={gameState.currentBorough?.id === "manhattan" ? "#ffffff" : "#ffffff50"}
-                strokeWidth="3"
-                className="hover:stroke-white hover:fill-indigo-500/30 transition-all duration-200"
-              />
-            </g>
+              fill={gameState.currentBorough?.id === "manhattan" ? "rgba(79, 70, 229, 0.6)" : "rgba(255, 255, 255, 0.1)"}
+              stroke={gameState.currentBorough?.id === "manhattan" ? "#ffffff" : "#ffffff50"}
+              strokeWidth="3"
+              className="borough manhattan hover:stroke-white hover:fill-indigo-500/30 transition-all duration-200 cursor-pointer"
+            />
             
             {/* Bronx Clickable Area */}
-            <g 
+            <polygon 
+              points="250,120 270,100 290,90 310,110 300,130 270,140" 
               onClick={() => handleSelect(gameState.boroughs.find(b => b.id === "bronx")!)}
-              className="cursor-pointer"
-            >
-              <path 
-                d="M260,185 L290,175 L330,170 L370,170 L410,175 L450,185 L480,200 L495,220 L490,245 L470,260 L430,270 L390,275 L350,275 L310,265 L285,250 L270,230 L260,210 Z" 
-                fill={gameState.currentBorough?.id === "bronx" ? "rgba(79, 70, 229, 0.6)" : "rgba(255, 255, 255, 0.1)"}
-                stroke={gameState.currentBorough?.id === "bronx" ? "#ffffff" : "#ffffff50"}
-                strokeWidth="3"
-                className="hover:stroke-white hover:fill-indigo-500/30 transition-all duration-200"
-              />
-            </g>
+              fill={gameState.currentBorough?.id === "bronx" ? "rgba(79, 70, 229, 0.6)" : "rgba(255, 255, 255, 0.1)"}
+              stroke={gameState.currentBorough?.id === "bronx" ? "#ffffff" : "#ffffff50"}
+              strokeWidth="3"
+              className="borough bronx hover:stroke-white hover:fill-indigo-500/30 transition-all duration-200 cursor-pointer"
+            />
+            
+            {/* Queens Clickable Area */}
+            <polygon 
+              points="300,200 350,220 370,190 360,160 330,140 310,170" 
+              onClick={() => handleSelect(gameState.boroughs.find(b => b.id === "queens")!)}
+              fill={gameState.currentBorough?.id === "queens" ? "rgba(79, 70, 229, 0.6)" : "rgba(255, 255, 255, 0.1)"}
+              stroke={gameState.currentBorough?.id === "queens" ? "#ffffff" : "#ffffff50"}
+              strokeWidth="3"
+              className="borough queens hover:stroke-white hover:fill-indigo-500/30 transition-all duration-200 cursor-pointer"
+            />
           </svg>
         </div>
         
