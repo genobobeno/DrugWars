@@ -66,7 +66,7 @@ const marketEvents: GameEvent[] = [
     type: "market",
     category: "daily",
     title: "Market Crash",
-    description: "Economic news has caused a market panic. Prices for luxury goods have plummeted!",
+    description: "Economic news has caused a market panic. Drug prices have plummeted!",
     effect: "neutral",
     probability: 0.05,
     effects: []
@@ -76,7 +76,7 @@ const marketEvents: GameEvent[] = [
     type: "market",
     category: "daily",
     title: "Hot Tip",
-    description: "You overheard a conversation about a shipment shortage. Certain items will be in high demand soon!",
+    description: "You overheard a conversation about a drug shortage. Certain drugs will be in high demand soon!",
     effect: "positive",
     probability: 0.1,
     effects: []
@@ -200,7 +200,7 @@ const inventoryEvents: GameEvent[] = [
     type: "inventory",
     category: "travel",
     title: "Abandoned Stash",
-    description: "You found someone's abandoned stash of goods. Finders keepers!",
+    description: "You found someone's abandoned stash of drugs. They had to ditch it quickly and you got lucky. You sold it for a quick profit!",
     effect: "positive",
     probability: 0.08,
     effects: [

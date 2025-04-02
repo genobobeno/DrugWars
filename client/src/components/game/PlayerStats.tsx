@@ -78,11 +78,12 @@ export default function PlayerStats({ headerHidden = false }: PlayerStatsProps) 
         </div>
       )}
       
-      {/* Stats Panel - Positioned at bottom with clear spacing from top */}
-      <div className={`relative z-10 ${headerHidden ? "" : "mt-auto p-3 bg-black/70 backdrop-blur-sm"}`}>
+      {/* Stats Panel - Positioned with a specific top position to leave room at bottom */}
+      <div className={`relative z-10 ${headerHidden ? "" : "bottom-0 p-3 bg-black/70 backdrop-blur-sm"}`} 
+            style={{ position: 'absolute', bottom: '0', left: '0', right: '0' }}>
         {!headerHidden && <h3 className="text-sm uppercase tracking-wider mb-2 text-white/90">Player Stats</h3>}
         
-        <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-white mb-2">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-white mb-3">
           {/* Cash - Green */}
           <div className="flex items-center gap-2">
             <DollarSign className="h-5 w-5 text-green-500" />
@@ -120,8 +121,8 @@ export default function PlayerStats({ headerHidden = false }: PlayerStatsProps) 
           </div>
         </div>
         
-        {/* Health Bar - Back at the bottom in blue */}
-        <div className="mt-1">
+        {/* Health Bar - Emphasized at the bottom */}
+        <div className="mt-1 mb-1">
           <div className="flex justify-between text-xs mb-1 text-white">
             <div className="flex items-center">
               <Heart className="h-4 w-4 mr-1 text-blue-500" />
@@ -131,7 +132,7 @@ export default function PlayerStats({ headerHidden = false }: PlayerStatsProps) 
           </div>
           <Progress 
             value={gameState?.health || 100} 
-            className="h-2 bg-gray-700 [&>div]:bg-blue-500"
+            className="h-3 bg-gray-700 [&>div]:bg-blue-500"
           />
         </div>
       </div>
