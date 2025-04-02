@@ -1,16 +1,25 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
 import { useGlobalGameState } from "../../lib/stores/useGlobalGameState";
 import { useAudio } from "../../lib/stores/useAudio";
-import { ArrowUpCircle, ArrowDownCircle, RefreshCw, Trophy, ChevronRight } from "lucide-react";
+import { 
+  ArrowUpCircle, 
+  ArrowDownCircle, 
+  RefreshCw, 
+  Trophy, 
+  ChevronRight,
+  Share 
+} from "lucide-react";
 import HighScoreForm from "./HighScoreForm";
 import HighScoreTable from "./HighScoreTable";
 import GameProgressChart from "./GameProgressChart";
 import GameStatsFooter from "./GameStatsFooter";
 import { recordGameStarted } from "../../lib/api";
 import { DailySnapshot } from "../../lib/api";
+import SocialShare from "./SocialShare";
+import AchievementBadge from "./AchievementBadge";
 
 // Calculate compound daily growth rate (CDGR)
 function calculateCompoundGrowthRate(snapshots: DailySnapshot[], finalGameState?: {cash: number, bank: number, debt: number}): number {
@@ -120,6 +129,20 @@ export default function GameOver() {
   const finalProfit = gameState.cash - gameState.startingCash - gameState.debt;
   const isWinner = finalProfit > 0;
   
+  // Generate achievement text based on game performance
+  const achievementText = useMemo(() => {
+    // No achievement for losers
+    if (!isWinner) return "";
+    
+    // Different tiers of achievements
+    if (finalScore > 25000) return "Became a NYC Legend! 🏆";
+    if (finalScore > 15000) return "Mastered the hustle! 💰";
+    if (finalScore > 10000) return "Made it big in the Big Apple! 🍎";
+    if (finalScore > 5000) return "Turned a profit in NYC! 📈";
+    
+    return "Survived the streets of NYC!";
+  }, [finalScore, isWinner]);
+  
   // Generate game summary
   const topItem = gameState.transactionHistory.reduce<{item: string, count: number} | null>((acc, tx) => {
     if (tx.type === 'buy' && (!acc || tx.quantity > acc.count)) {
@@ -222,8 +245,11 @@ export default function GameOver() {
                 </>
               )}
             </CardTitle>
-            <CardDescription className="text-center">
-              You survived {gameState.currentDay} days in NYC
+            <CardDescription className="text-center flex flex-col items-center gap-2">
+              <span>You survived {gameState.currentDay} days in NYC</span>
+              {isWinner && achievementText && (
+                <span className="font-medium text-base text-primary">{achievementText}</span>
+              )}
             </CardDescription>
           </CardHeader>
           
@@ -233,9 +259,14 @@ export default function GameOver() {
                 <p className="text-4xl font-bold">
                   ${finalScore.toLocaleString()}
                 </p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Final Score (Cash + Bank - Debt)
-                </p>
+                <div className="flex items-center justify-center mt-1">
+                  <p className="text-sm text-muted-foreground">
+                    Final Score (Cash + Bank - Debt)
+                  </p>
+                  {isWinner && (
+                    <AchievementBadge score={finalScore} className="ml-2" />
+                  )}
+                </div>
               </div>
               
               <Separator />
@@ -335,6 +366,17 @@ export default function GameOver() {
                 New Game
               </Button>
             </div>
+            
+            {/* Social share section for winners */}
+            {isWinner && (
+              <div className="mt-4 pt-4 border-t">
+                <SocialShare 
+                  score={finalScore}
+                  daysPlayed={gameState.currentDay}
+                  achievement={achievementText}
+                />
+              </div>
+            )}
             
             {/* Game progress chart below buttons */}
             <div className="mt-6 border-t pt-4 w-full">
