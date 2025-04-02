@@ -4,6 +4,42 @@ import { drugs } from "./gameData";
 // Track active drug events
 const activeEvents: Record<string, boolean> = {};
 
+/**
+ * Generate a price within a range that's unlikely to hit the exact boundaries
+ * This creates a more natural price distribution by:
+ * 1. Slightly contracting the range to avoid exact boundary values
+ * 2. Adding small random noise to reduce price predictability
+ */
+function generatePriceInRange(minPrice: number, maxPrice: number): number {
+  // Create a small buffer (0.5-2% of range) to avoid exact boundary values
+  const range = maxPrice - minPrice;
+  const buffer = Math.max(5, range * 0.01);
+  
+  // Generate price within a slightly contracted range
+  const adjustedMin = minPrice + buffer;
+  const adjustedMax = maxPrice - buffer;
+  
+  let price: number;
+  // Handle the case where range is very small
+  if (adjustedMax <= adjustedMin) {
+    // Even with small ranges, add some randomness rather than just using midpoint
+    const midPoint = (minPrice + maxPrice) / 2;
+    const smallNoise = (Math.random() * 0.1 - 0.05) * (maxPrice - minPrice); // ±5% of range
+    price = midPoint + smallNoise;
+  } else {
+    price = adjustedMin + Math.random() * (adjustedMax - adjustedMin);
+  }
+  
+  // Add small noise (-3 to +3) to make prices less predictable
+  // This helps prevent patterns like always seeing the same numbers
+  price += (Math.random() * 6 - 3);
+  
+  // Ensure we're still within the original range
+  price = Math.min(Math.max(price, minPrice), maxPrice);
+  
+  return price;
+}
+
 // Generate prices for all items based on location, drug availability, and events
 export function generatePrices(
   items: MarketItem[],
@@ -34,12 +70,13 @@ export function generatePrices(
       if (isEvent) {
         // Use event price range
         [minPrice, maxPrice] = drug.eventParameters;
-        price = minPrice + Math.random() * (maxPrice - minPrice);
       } else {
         // Use normal price range
         [minPrice, maxPrice] = drug.noEventParameters;
-        price = minPrice + Math.random() * (maxPrice - minPrice);
       }
+      
+      // Generate price using our improved method that avoids boundary values
+      price = generatePriceInRange(minPrice, maxPrice);
 
       // Apply location-based factor if a borough is provided
       if (currentBorough) {
@@ -49,24 +86,13 @@ export function generatePrices(
           ] || 1;
         price *= locationFactor;
         
-        // Ensure price stays within the defined range for the drug
-        // even after borough multipliers are applied
-        if (!isEvent) {
-          // For normal prices
-          price = Math.min(Math.max(price, minPrice), maxPrice);
-        } else {
-          // For event prices
-          price = Math.min(Math.max(price, minPrice), maxPrice);
+        // If factor pushes price outside range, adjust but avoid exact boundaries
+        if (price < minPrice || price > maxPrice) {
+          price = generatePriceInRange(
+            Math.min(price, minPrice), 
+            Math.max(price, maxPrice)
+          );
         }
-      }
-
-      // Enforce strict limits based on the drug's event status
-      if (isEvent) {
-        // If it's an event, use event parameters as strict min/max
-        price = Math.min(Math.max(price, drug.eventParameters[0]), drug.eventParameters[1]);
-      } else {
-        // If it's not an event, use normal parameters as strict min/max
-        price = Math.min(Math.max(price, drug.noEventParameters[0]), drug.noEventParameters[1]);
       }
       
       // Round to nearest dollar
