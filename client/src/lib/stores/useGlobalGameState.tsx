@@ -398,11 +398,17 @@ export const useGlobalGameState = create<GameStateStore>((set, get) => {
           }
         }
         
+        // Add current day to the event
+        const eventWithDay = {
+          ...event,
+          day: updatedState.currentDay
+        };
+        
         // Add event to history and update current event
         const finalState = {
           ...updatedState,
-          currentEvent: event,
-          eventHistory: [...updatedState.eventHistory, event]
+          currentEvent: eventWithDay,
+          eventHistory: [...updatedState.eventHistory, eventWithDay]
         };
         
         // Save game state
@@ -410,7 +416,7 @@ export const useGlobalGameState = create<GameStateStore>((set, get) => {
         
         return { 
           gameState: finalState,
-          currentEvent: event
+          currentEvent: eventWithDay
         };
       });
     },

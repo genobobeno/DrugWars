@@ -61,11 +61,33 @@ export default function MainGame() {
   const handleEndDay = () => {
     playSuccess();
     
+    // Track if we've seen gun or police event already today
+    const hasGunEventToday = gameState.eventHistory.some(event => 
+      event.type === 'gun' && event.day === gameState.currentDay
+    );
+    
+    const hasPoliceEventToday = gameState.eventHistory.some(event => 
+      event.type === 'police_encounter' && event.day === gameState.currentDay
+    );
+    
     // Check for random events on end of day (30% chance)
     if (Math.random() < 0.3) {
       const event = getRandomEvent('daily', gameState);
-      if (event) {
-        setGameEvent(event);
+      
+      // Only process the event if:
+      // 1. It's not a gun event when we already had a police event today
+      // 2. It's not a police encounter when we already had a gun event today
+      const shouldSkipEvent = 
+        (event?.type === 'gun' && hasPoliceEventToday) ||
+        (event?.type === 'police_encounter' && hasGunEventToday);
+      
+      if (event && !shouldSkipEvent) {
+        // Tag the event with the current day for tracking
+        const eventWithDay = {
+          ...event,
+          day: gameState.currentDay
+        };
+        setGameEvent(eventWithDay);
         return; // Wait for event to be closed before progressing
       }
     }
@@ -83,6 +105,29 @@ export default function MainGame() {
   
   // Handle event closed
   const handleEventClosed = () => {
+    // Check if there is a current event in the game state
+    const currentEvent = gameState.currentEvent;
+    if (currentEvent) {
+      // Make sure the event has the current day recorded with it
+      const eventWithDay = {
+        ...currentEvent,
+        day: gameState.currentDay
+      };
+      
+      // Add the event to the history if not already there
+      if (!gameState.eventHistory.some(event => event.id === currentEvent.id)) {
+        // Update the event history in game state
+        const updatedGameState = {
+          ...gameState,
+          eventHistory: [...gameState.eventHistory, eventWithDay]
+        };
+        
+        // Save the updated state to local storage
+        localStorage.setItem("nyc-hustler-game-state", JSON.stringify(updatedGameState));
+      }
+    }
+    
+    // Clear the current event
     clearGameEvent();
   };
   

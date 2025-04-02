@@ -275,7 +275,25 @@ const allEvents = [
 // Get a random event based on category
 export function getRandomEvent(category: EventCategory, gameState: GameState): GameEvent | null {
   // Filter events by category
-  const eligibleEvents = allEvents.filter(event => event.category === category);
+  let eligibleEvents = allEvents.filter(event => event.category === category);
+  
+  if (eligibleEvents.length === 0) {
+    return null;
+  }
+  
+  // Check if we currently have a gun offer or police encounter
+  // (to prevent both happening in the same day)
+  const currentEvent = gameState.currentEvent;
+  
+  if (currentEvent) {
+    if (currentEvent.type === 'gun') {
+      // If current event is a gun offer, filter out police encounters
+      eligibleEvents = eligibleEvents.filter(event => event.type !== 'police_encounter');
+    } else if (currentEvent.type === 'police_encounter') {
+      // If current event is a police encounter, filter out gun offers
+      eligibleEvents = eligibleEvents.filter(event => event.type !== 'gun');
+    }
+  }
   
   if (eligibleEvents.length === 0) {
     return null;

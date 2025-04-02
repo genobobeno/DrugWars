@@ -73,6 +73,7 @@ export interface GameEvent {
   probability: number;
   effects?: EventEffect[];
   impactSummary?: string[];
+  day?: number; // The day this event occurred
 }
 
 // Game state interface
