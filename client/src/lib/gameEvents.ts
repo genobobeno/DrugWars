@@ -1,4 +1,5 @@
-import { GameState, GameEvent } from "../types/game";
+import { GameState, GameEvent, NPCCharacter } from "../types/game";
+import { npcCharacters } from "./gameData";
 
 // Define event types and categories
 type EventCategory = 'travel' | 'daily' | 'location';
@@ -326,6 +327,22 @@ const gunEvents: GameEvent[] = [
   }
 ];
 
+// NPC encounter events - encounters with special NPCs offering deals
+const generateNpcEvents = (): GameEvent[] => {
+  return npcCharacters.map(npc => ({
+    id: `npc_${npc.id}`,
+    type: "npc", // Changed from npc_encounter to match our EventDisplay handler
+    category: "daily",
+    title: `${npc.name} Approaches`,
+    description: `${npc.description} ${npc.personality}`,
+    effect: "positive",
+    probability: npc.probability,
+    npc: npc
+  }));
+};
+
+const npcEvents = generateNpcEvents();
+
 // Combine all events
 const allEvents = [
   ...policeEvents,
@@ -336,7 +353,8 @@ const allEvents = [
   ...debtEvents,
   ...cashEvents,
   ...trenchcoatEvents,
-  ...gunEvents
+  ...gunEvents,
+  ...npcEvents
 ];
 
 // Get a random event based on category
@@ -375,20 +393,44 @@ export function getRandomEvent(category: EventCategory, gameState: GameState): G
       }
     }
     
+    // Handle NPC events - check if NPC favors the current borough
+    if (event.type === 'npc' && event.npc && gameState.currentBorough) {
+      // Check if this NPC has favored boroughs
+      if (event.npc.favoredBoroughs.length > 0) {
+        const currentBoroughId = gameState.currentBorough.id;
+        const isInFavoredBorough = event.npc.favoredBoroughs.includes(currentBoroughId);
+        
+        // Higher chance to appear in favored boroughs
+        // In non-favored boroughs, reduce probability by 70%
+        if (!isInFavoredBorough) {
+          // We'll use a random roll to simulate reduced probability
+          if (Math.random() > 0.3) { // Only 30% chance to appear in non-favored borough
+            return false;
+          }
+        }
+      }
+    }
+    
     return true;
   });
   
-  // Check if we currently have a gun offer or police encounter
-  // (to prevent both happening in the same day)
+  // Check if we currently have a special event already
   const currentEvent = gameState.currentEvent;
   
   if (currentEvent) {
+    // Prevent overlapping special events
     if (currentEvent.type === 'gun') {
-      // If current event is a gun offer, filter out police encounters
-      eligibleEvents = eligibleEvents.filter(event => event.type !== 'police_encounter');
+      // If current event is a gun offer, filter out police encounters and NPCs
+      eligibleEvents = eligibleEvents.filter(event => 
+        event.type !== 'police_encounter' && event.type !== 'npc');
     } else if (currentEvent.type === 'police_encounter') {
-      // If current event is a police encounter, filter out gun offers
-      eligibleEvents = eligibleEvents.filter(event => event.type !== 'gun');
+      // If current event is a police encounter, filter out gun offers and NPCs
+      eligibleEvents = eligibleEvents.filter(event => 
+        event.type !== 'gun' && event.type !== 'npc');
+    } else if (currentEvent.type === 'npc') {
+      // If current event is an NPC encounter, filter out police encounters and gun offers
+      eligibleEvents = eligibleEvents.filter(event => 
+        event.type !== 'police_encounter' && event.type !== 'gun');
     }
   }
   

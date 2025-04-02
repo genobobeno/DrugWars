@@ -1,4 +1,4 @@
-import { Borough, MarketItem, DrugItem } from "../types/game";
+import { Borough, MarketItem, DrugItem, NPCCharacter, NPCDeal } from "../types/game";
 
 // Define the boroughs
 export const boroughs: Borough[] = [
@@ -213,3 +213,172 @@ export const items: MarketItem[] = drugs.map(drug => ({
   basePrice: drug.basePrice,
   volatility: drug.volatility
 }));
+
+// Define NPC characters with special deals
+export const npcCharacters: NPCCharacter[] = [
+  {
+    id: "jimmy_stash",
+    name: "Jimmy Stash",
+    description: "A fidgety young dealer from Queens with connections to premium stash houses.",
+    personality: "Nervous but business-minded, always looking for the next big deal.",
+    favoredBoroughs: ["queens", "brooklyn"],
+    probability: 0.15,
+    deals: [
+      {
+        id: "jimmy_bulk_weed",
+        type: "sell",
+        itemId: "weed",
+        itemName: "Premium Weed",
+        quantity: 30,
+        price: 400, // Discount from normal price
+        description: "I got some premium grade stuff, much better than street quality. I'll give you 30 units for a special price."
+      },
+      {
+        id: "jimmy_buy_cocaine",
+        type: "buy",
+        itemId: "cocaine",
+        itemName: "Cocaine",
+        price: 32000, // Higher than normal price
+        description: "My uptown clients are desperate for quality blow. I'll pay top dollar if you have any to sell."
+      }
+    ]
+  },
+  {
+    id: "big_tony",
+    name: "Big Tony",
+    description: "A well-connected mob associate who deals in high-value transactions.",
+    personality: "Calm, calculated, and intimidating. Speaks quietly but carries weight.",
+    favoredBoroughs: ["manhattan", "staten_island"],
+    probability: 0.12,
+    deals: [
+      {
+        id: "tony_heroin_deal",
+        type: "sell",
+        itemId: "heroin",
+        itemName: "Pure Heroin",
+        quantity: 15,
+        price: 7500, // Discount
+        description: "Just got a shipment of the pure stuff. Premium quality, no cuts. I'll let 15 units go at a special price because I like your style."
+      },
+      {
+        id: "tony_protection",
+        type: "special",
+        specialEffect: {
+          type: "health",
+          value: 25
+        },
+        description: "I can offer you some protection in these streets. For $1000, my boys will watch your back, reducing your chances of getting hurt."
+      },
+      {
+        id: "tony_debt_reduction",
+        type: "special",
+        specialEffect: {
+          type: "debt",
+          value: -1000
+        },
+        description: "I know some people who owe you money. For $2000 cash, I can get them to reduce your debt by $3000."
+      }
+    ]
+  },
+  {
+    id: "shadow",
+    name: "Shadow",
+    description: "A mysterious figure who specializes in rare psychedelics and underground connections.",
+    personality: "Speaks in riddles and has an air of mystique. Highly knowledgeable about underground markets.",
+    favoredBoroughs: ["brooklyn", "bronx"],
+    probability: 0.1,
+    deals: [
+      {
+        id: "shadow_acid_deal",
+        type: "sell",
+        itemId: "acid",
+        itemName: "Pure LSD",
+        quantity: 25,
+        price: 2000, // Discount
+        description: "These tabs came from the best chemist on the west coast. Much cleaner trip than the street stuff. I can let 25 units go for a special price."
+      },
+      {
+        id: "shadow_peyote_deal",
+        type: "sell",
+        itemId: "peyote",
+        itemName: "Rare Peyote",
+        quantity: 15,
+        price: 300, // Discount
+        description: "Genuine ceremonial-grade peyote, imported from the southwest. This stuff is hard to find in NYC. 15 units, special price."
+      },
+      {
+        id: "shadow_space_upgrade",
+        type: "special",
+        specialEffect: {
+          type: "maxInventorySpace",
+          value: 40
+        },
+        description: "I know a guy who makes custom compartments for discreet transport. For $1500, he can mod your gear to hold 40 more units."
+      }
+    ]
+  },
+  {
+    id: "doctor_feel_good",
+    name: "Doctor Feel Good",
+    description: "A former medical professional who now deals in pharmaceutical-grade products.",
+    personality: "Professional, precise, and clinical in approach. Still uses medical terminology.",
+    favoredBoroughs: ["manhattan", "queens"],
+    probability: 0.13,
+    deals: [
+      {
+        id: "doctor_speed_deal",
+        type: "sell",
+        itemId: "speed",
+        itemName: "Pharmaceutical Speed",
+        quantity: 50,
+        price: 100, // Discount
+        description: "Pharmaceutical-grade amphetamines. Much safer and more consistent than street meth. I can provide 50 units at a discount."
+      },
+      {
+        id: "doctor_health_pack",
+        type: "special",
+        specialEffect: {
+          type: "health",
+          value: 50
+        },
+        description: "I still have my medical supplies. For $800, I can patch you up completely - no questions asked."
+      }
+    ]
+  },
+  {
+    id: "street_hustler",
+    name: "Lil' Hustle",
+    description: "A young street entrepreneur who's always working multiple angles.",
+    personality: "Fast-talking, energetic, and always on the lookout for opportunities.",
+    favoredBoroughs: ["bronx", "brooklyn", "queens"],
+    probability: 0.2,
+    deals: [
+      {
+        id: "hustle_ecstasy_deal",
+        type: "trade",
+        itemId: "ecstasy",
+        itemName: "Club Ecstasy",
+        quantity: 30,
+        description: "I got these pills from the club scene, but I need some weed. Trade me 10 units of weed for 30 pills of E?"
+      },
+      {
+        id: "hustle_crack_deal",
+        type: "sell",
+        itemId: "crack",
+        itemName: "Crack",
+        quantity: 20,
+        price: 1500, // Discount
+        description: "Just cooked this batch myself. Purest stuff in the neighborhood. I'll hook you up with 20 units at a special price."
+      },
+      {
+        id: "hustle_gun_deal",
+        type: "special",
+        specialEffect: {
+          type: "guns",
+          value: 1
+        },
+        description: "I found this piece yesterday. Clean, no history. $500 and it's yours, no questions asked."
+      }
+    ]
+  }
+];

@@ -62,6 +62,30 @@ export interface EventEffect {
   value: number;
 }
 
+// NPC special deal
+export interface NPCDeal {
+  id: string;
+  type: 'buy' | 'sell' | 'trade' | 'special';
+  itemId?: string;
+  itemName?: string;
+  quantity?: number;
+  price?: number;
+  specialEffect?: EventEffect;
+  description: string;
+}
+
+// NPC character
+export interface NPCCharacter {
+  id: string;
+  name: string;
+  description: string;
+  personality: string;
+  image?: string;
+  favoredBoroughs: string[]; // Borough IDs where this NPC is more likely to appear
+  deals: NPCDeal[];
+  probability: number; // Chance of appearing
+}
+
 // Game event
 export interface GameEvent {
   id: string;
@@ -74,6 +98,7 @@ export interface GameEvent {
   effects?: EventEffect[];
   impactSummary?: string[];
   day?: number; // The day this event occurred
+  npc?: NPCCharacter; // Optional NPC for NPC-based events
 }
 
 // Game state interface

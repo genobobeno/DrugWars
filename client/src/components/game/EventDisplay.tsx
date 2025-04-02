@@ -13,8 +13,10 @@ import {
   Shirt,
   Zap,
   UserRoundX,
-  UserRoundCheck
+  UserRoundCheck,
+  UserRound
 } from "lucide-react";
+import NPCEncounter from "./NPCEncounter";
 import { 
   AlertDialog, 
   AlertDialogContent, 
@@ -42,7 +44,8 @@ const eventIcons: Record<string, LucideIcon> = {
   "gun": Zap,
   "neutral": AlertCircle,
   "beneficial": Shield,
-  "harmful": PanelBottom
+  "harmful": PanelBottom,
+  "npc": UserRound
 };
 
 interface EventDisplayProps {
@@ -209,6 +212,9 @@ export default function EventDisplay({ onClose }: EventDisplayProps) {
   
   // Determine if this is a police encounter event
   const isPoliceEncounter = currentEvent.type === "police_encounter" && currentEvent.id === "police_encounter";
+  
+  // Determine if this is an NPC encounter
+  const isNPCEncounter = currentEvent.type === "npc" && currentEvent.npc;
   
   // Check if player can afford the trenchcoat
   const canAffordTrenchcoat = isTrenchcoatOffer && gameState.cash >= trenchcoatPrice;
@@ -516,6 +522,11 @@ export default function EventDisplay({ onClose }: EventDisplayProps) {
     onClose();
   };
   
+  // For NPC encounters, we delegate to the NPCEncounter component
+  if (isNPCEncounter) {
+    return <NPCEncounter onClose={onClose} />;
+  }
+
   return (
     <AlertDialog open={!!currentEvent} onOpenChange={(open) => !open && onClose()}>
       <AlertDialogContent>
