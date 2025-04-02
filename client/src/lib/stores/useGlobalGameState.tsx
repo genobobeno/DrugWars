@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { generatePrices } from '../priceGenerator';
 import { GameState, Borough, GameEvent, MarketItem, InventoryItem, Transaction, GamePhase } from '../../types/game';
 import { getLocalStorage, setLocalStorage } from '../utils';
-import { boroughs, items } from '../gameData';
+import { boroughs, items, drugs } from '../gameData';
 
 const STORAGE_KEY = 'nyc-hustler-game-state';
 
@@ -76,7 +76,7 @@ export const useGlobalGameState = create<GameStateStore>((set, get) => {
     
     // Start a new game
     startGame: () => {
-      // Generate initial prices
+      // Generate initial prices with drug-specific logic
       const initialPrices = generatePrices(items, null);
       
       set(state => ({
@@ -96,8 +96,26 @@ export const useGlobalGameState = create<GameStateStore>((set, get) => {
     
     // Restart the game
     restartGame: () => {
+      // Clear all stored game data
       localStorage.removeItem(STORAGE_KEY);
-      get().startGame();
+      
+      // Generate drug-specific prices
+      const initialPrices = generatePrices(items, null);
+      
+      // Set completely new state to ensure no old data remains
+      set({
+        gameState: {
+          ...initialGameState,
+          phase: 'playing' as const,
+          items: items, // Ensure we're using the new drug items
+          currentPrices: initialPrices,
+          inventory: [] // Explicitly clear inventory
+        },
+        currentEvent: null
+      });
+      
+      // Save the fresh state
+      setLocalStorage(STORAGE_KEY, get().gameState);
     },
     
     // Set current borough
