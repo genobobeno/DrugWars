@@ -152,7 +152,7 @@ const inventoryEvents: GameEvent[] = [
     effects: [
       { type: "inventory", value: -1 } // Special value: will be calculated as 15-30% in component
     ],
-    impactSummary: ["Lost 15-30% of your inventory"]
+    impactSummary: ["Lost some drugs"]
   },
   {
     id: "inventory_robbed",
@@ -165,7 +165,7 @@ const inventoryEvents: GameEvent[] = [
     effects: [
       { type: "inventory", value: -1 } // Special value: will be calculated as 15-30% in component
     ],
-    impactSummary: ["Lost 15-30% of your inventory"]
+    impactSummary: ["Lost some drugs"]
   },
   {
     id: "inventory_conned",
@@ -178,7 +178,7 @@ const inventoryEvents: GameEvent[] = [
     effects: [
       { type: "inventory", value: -1 } // Special value: will be calculated as 10-25% in component
     ],
-    impactSummary: ["Lost 10-25% of your inventory"]
+    impactSummary: ["Lost some drugs"]
   },
   {
     id: "inventory_donation",
@@ -192,7 +192,7 @@ const inventoryEvents: GameEvent[] = [
       { type: "inventory", value: -1 } // Special value: will be calculated as 5-10% in component
       // Could add some small health or karma boost in the future
     ],
-    impactSummary: ["Donated 5-10% of your inventory"]
+    impactSummary: ["Donated some drugs"]
   },
   {
     id: "inventory_bonus",
@@ -253,7 +253,7 @@ const cashEvents: GameEvent[] = [
     effects: [
       { type: "cash", value: -1 } // Will be calculated as a percentage in EventDisplay
     ],
-    impactSummary: ["Lost 15-25% of your cash"]
+    impactSummary: ["Lost some cash"]
   },
   {
     id: "cash_mugged",
@@ -266,7 +266,7 @@ const cashEvents: GameEvent[] = [
     effects: [
       { type: "cash", value: -1 } // Will be calculated as a percentage (20-40%) in the component
     ],
-    impactSummary: ["Lost 20-40% of your cash"]
+    impactSummary: ["Lost some cash"]
   },
   {
     id: "cash_gambling_win",

@@ -360,27 +360,27 @@ export const useGlobalGameState = create<GameStateStore>((set, get) => {
                       const percentage = 10 + Math.floor(Math.random() * 31); // 10-40%
                       deductionAmount = Math.floor(updatedState.cash * percentage / 100);
                       
-                      // Update the event description with the actual amount
-                      event.description = `You were attacked and robbed while traveling through a dangerous neighborhood. They took $${deductionAmount} (${percentage}% of your cash).`;
-                      event.impactSummary = ["-15 health", `-$${deductionAmount} cash (${percentage}%)`];
+                      // Update the event description with only the dollar amount
+                      event.description = `You were attacked and robbed while traveling through a dangerous neighborhood. They took $${deductionAmount}.`;
+                      event.impactSummary = ["-15 health", `-$${deductionAmount} cash`];
                     }
                     // For lost wallet: 15-25% of cash
                     else if (event.id === "cash_lost_wallet") {
                       const percentage = 15 + Math.floor(Math.random() * 11); // 15-25%
                       deductionAmount = Math.floor(updatedState.cash * percentage / 100);
                       
-                      // Update the event description with the actual amount
-                      event.description = `You lost your wallet while traveling. You lost $${deductionAmount} (${percentage}% of your cash).`;
-                      event.impactSummary = [`-$${deductionAmount} cash (${percentage}%)`];
+                      // Update the event description with only the dollar amount
+                      event.description = `You lost your wallet while traveling. You lost $${deductionAmount}.`;
+                      event.impactSummary = [`-$${deductionAmount} cash`];
                     }
                     // For mugged: 20-40% of cash
                     else if (event.id === "cash_mugged") {
                       const percentage = 20 + Math.floor(Math.random() * 21); // 20-40%
                       deductionAmount = Math.floor(updatedState.cash * percentage / 100);
                       
-                      // Update the event description with the actual amount
-                      event.description = `You were mugged at knifepoint in a dark alley. They took $${deductionAmount} (${percentage}% of your cash).`;
-                      event.impactSummary = [`-$${deductionAmount} cash (${percentage}%)`];
+                      // Update the event description with only the dollar amount
+                      event.description = `You were mugged at knifepoint in a dark alley. They took $${deductionAmount}.`;
+                      event.impactSummary = [`-$${deductionAmount} cash`];
                     }
                   } 
                   // For fixed amount events like police bribes, debt collectors, cap at available cash
@@ -447,18 +447,18 @@ export const useGlobalGameState = create<GameStateStore>((set, get) => {
                         lossDescription = `Lost ${percentageLoss}% of your inventory`;
                     }
                     
-                    // Update event description and summary with percentage
+                    // Update event description and summary without showing exact percentage
                     if (event.id === "inventory_police_escape") {
-                      event.description = `You had to drop ${percentageLoss}% of your drugs while running from the police!`;
+                      event.description = `You had to drop some drugs while running from the police!`;
                     } else if (event.id === "inventory_robbed") {
-                      event.description = `A gang of thugs cornered you in an alley and stole ${percentageLoss}% of your drugs!`;
+                      event.description = `A gang of thugs cornered you in an alley and stole some of your drugs!`;
                     } else if (event.id === "inventory_conned") {
-                      event.description = `Another dealer tricked you in a deal and threatened violence, taking ${percentageLoss}% of your inventory.`;
+                      event.description = `Another dealer tricked you in a deal and threatened violence. You lost some drugs.`;
                     } else if (event.id === "inventory_donation") {
-                      event.description = `You met someone suffering from severe withdrawal. You felt compassion and donated ${percentageLoss}% of your drugs.`;
+                      event.description = `You met someone suffering from severe withdrawal. You felt compassion and donated some of your drugs.`;
                     }
                     
-                    event.impactSummary = [lossDescription];
+                    event.impactSummary = ["Lost some drugs"];
                     
                     // Process each inventory item to reduce by percentage
                     updatedState.inventory = updatedState.inventory.map(item => {
