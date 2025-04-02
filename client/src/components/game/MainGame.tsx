@@ -177,6 +177,18 @@ export default function MainGame() {
             selectedItemToSell={selectedItemToSell} 
             clearSelectedItem={() => setSelectedItemToSell(null)} 
           />
+          
+          {/* End Day Button */}
+          <div className="mt-3 mb-2 flex justify-end">
+            <Button 
+              onClick={handleEndDay}
+              className="flex items-center gap-2"
+            >
+              <CalendarDays className="h-4 w-4" />
+              End Day
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
         
         {/* Inventory and Banking - Fixed 350px width */}
