@@ -55,6 +55,11 @@ export default function EventDisplay({ onClose }: EventDisplayProps) {
     return Math.floor(Math.random() * 201) + 100; // 100 to 300
   }, [currentEvent?.id]);
   
+  // Generate a random inventory space increase between 10 and 35
+  const spaceIncrease = useMemo(() => {
+    return Math.floor(Math.random() * 26) + 10; // 10 to 35
+  }, [currentEvent?.id]);
+  
   useEffect(() => {
     if (!currentEvent) return;
     
@@ -78,20 +83,20 @@ export default function EventDisplay({ onClose }: EventDisplayProps) {
       if (!currentEvent.effects) {
         const updatedEvent = {
           ...currentEvent,
-          description: `A shady vendor offers you a larger trenchcoat with more pockets for $${trenchcoatPrice}. It will increase your inventory capacity by 25 slots.`,
+          description: `A shady vendor offers you a larger trenchcoat with more pockets for $${trenchcoatPrice}. It will increase your inventory capacity by ${spaceIncrease} slots.`,
           effects: [
             { type: 'cash' as const, value: -trenchcoatPrice },
-            { type: 'maxInventorySpace' as const, value: 25 }
+            { type: 'maxInventorySpace' as const, value: spaceIncrease }
           ],
           impactSummary: [
             `-$${trenchcoatPrice} cash`,
-            "+25 inventory capacity"
+            `+${spaceIncrease} inventory capacity`
           ]
         };
         setGameEvent(updatedEvent);
       }
     }
-  }, [currentEvent, playHit, playSuccess, trenchcoatPrice, setGameEvent]);
+  }, [currentEvent, playHit, playSuccess, trenchcoatPrice, spaceIncrease, setGameEvent]);
   
   // If no event, don't render
   if (!currentEvent) {
