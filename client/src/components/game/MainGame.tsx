@@ -107,7 +107,7 @@ export default function MainGame() {
         </div>
         
         {/* Right Side - Borough Selector Map - Fixed width */}
-        <div className="border-l border-gray-800 md:w-[400px] flex-shrink-0">
+        <div className="border-l border-gray-800 md:w-[450px] flex-shrink-0">
           <BoroughSelector onBoroughSelected={handleBoroughSelected} headerHidden={true} />
         </div>
       </div>
@@ -122,8 +122,8 @@ export default function MainGame() {
           />
         </div>
         
-        {/* Inventory and Banking - Fixed 400px width */}
-        <div className="md:w-[400px] flex-shrink-0 space-y-2">
+        {/* Inventory and Banking - Fixed 450px width */}
+        <div className="md:w-[450px] flex-shrink-0 space-y-2">
           <Inventory onSellClick={handleSellClick} />
           <Banking />
         </div>
