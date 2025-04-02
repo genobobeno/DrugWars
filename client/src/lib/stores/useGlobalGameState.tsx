@@ -48,9 +48,11 @@ interface GameStateStore {
   withdrawFromBank: (amount: number) => void;
   payDebt: (amount: number) => void;
   buyGuns: (quantity: number, pricePerGun?: number) => void;
-  updateCash: (amount: number) => void; // Add or remove cash
-  updateInventorySpace: (amount: number) => void; // Increase or decrease inventory space
-  addToEventHistory: (event: GameEvent) => void; // Add an event to the history
+  updateHealth: (amount: number) => void;
+  visitPrivateDoctor: (cost: number) => void;
+  updateCash: (amount: number) => void;
+  updateInventorySpace: (amount: number) => void;
+  addToEventHistory: (event: GameEvent) => void;
 }
 
 // Create Zustand store with all game logic
@@ -425,79 +427,52 @@ export const useGlobalGameState = create<GameStateStore>((set, get) => {
               case 'inventory':
                 // Remove inventory items if effect is negative
                 if (effect.value < 0 && updatedState.inventory.length > 0) {
-                  // Special case: value is -1 means percentage-based reduction
-                  if (effect.value === -1) {
-                    let percentageLoss = 0;
-                    let lossDescription = "";
+                  // Apply inventory loss to a random item, or all items if value is -100
+                  const isLosingAllItems = effect.value === -100;
+                  
+                  if (isLosingAllItems) {
+                    // Lose all inventory
+                    updatedState.inventory = [];
                     
-                    // Determine percentage based on event type
-                    switch (event.id) {
-                      case "inventory_police_escape":
-                      case "inventory_robbed":
-                        percentageLoss = 15 + Math.floor(Math.random() * 16); // 15-30%
-                        lossDescription = `Lost ${percentageLoss}% of your inventory`;
-                        break;
-                      case "inventory_conned":
-                        percentageLoss = 10 + Math.floor(Math.random() * 16); // 10-25%
-                        lossDescription = `Lost ${percentageLoss}% of your inventory`;
-                        break;
-                      case "inventory_donation":
-                        percentageLoss = 5 + Math.floor(Math.random() * 6); // 5-10%
-                        lossDescription = `Donated ${percentageLoss}% of your inventory`;
-                        break;
-                      default:
-                        percentageLoss = 10 + Math.floor(Math.random() * 11); // 10-20% fallback
-                        lossDescription = `Lost ${percentageLoss}% of your inventory`;
+                    // Add description that all inventory was lost
+                    if (event.impactSummary) {
+                      event.impactSummary.push("-All drugs");
+                    } else {
+                      event.impactSummary = ["-All drugs"];
                     }
+                  } else {
+                    // Choose a random item to lose some quantity
+                    const randomItemIndex = Math.floor(Math.random() * updatedState.inventory.length);
+                    const randomItem = updatedState.inventory[randomItemIndex];
                     
-                    // Update event description and summary without showing exact percentage
-                    if (event.id === "inventory_police_escape") {
-                      event.description = `You had to drop some drugs while running from the police!`;
-                    } else if (event.id === "inventory_robbed") {
-                      event.description = `A gang of thugs cornered you in an alley and stole some of your drugs!`;
-                    } else if (event.id === "inventory_conned") {
-                      event.description = `Another dealer tricked you in a deal and threatened violence. You lost some drugs.`;
-                    } else if (event.id === "inventory_donation") {
-                      event.description = `You met someone suffering from severe withdrawal. You felt compassion and donated some of your drugs.`;
-                    }
+                    // Calculate how much to lose (5-30% of current quantity)
+                    const lossPercentage = 5 + Math.floor(Math.random() * 26); // 5-30%
+                    let lossAmount = Math.max(1, Math.floor(randomItem.quantity * (lossPercentage / 100)));
                     
-                    event.impactSummary = ["Lost some drugs"];
+                    // Ensure we don't lose more than we have
+                    lossAmount = Math.min(lossAmount, randomItem.quantity);
                     
-                    // Process each inventory item to reduce by percentage
-                    updatedState.inventory = updatedState.inventory.map(item => {
-                      const lossAmount = Math.floor(item.quantity * percentageLoss / 100);
-                      return {
-                        ...item,
-                        quantity: Math.max(0, item.quantity - lossAmount)
+                    // Update inventory
+                    const updatedInventory = [...updatedState.inventory];
+                    if (lossAmount >= randomItem.quantity) {
+                      // Remove item entirely if all is lost
+                      updatedInventory.splice(randomItemIndex, 1);
+                    } else {
+                      // Reduce quantity
+                      updatedInventory[randomItemIndex] = {
+                        ...randomItem,
+                        quantity: randomItem.quantity - lossAmount
                       };
-                    })
-                    .filter(item => item.quantity > 0); // Remove any empty items
-                  }
-                  // For fixed item loss (legacy code - may still be used in some events)
-                  else {
-                    const totalItems = updatedState.inventory.reduce((sum, item) => sum + item.quantity, 0);
-                    const itemsToRemove = Math.min(Math.abs(effect.value), totalItems);
+                    }
                     
-                    if (itemsToRemove > 0) {
-                      // Choose a random item to remove from
-                      const itemIndex = Math.floor(Math.random() * updatedState.inventory.length);
-                      const item = updatedState.inventory[itemIndex];
-                      
-                      // Remove items
-                      const newQuantity = item.quantity - itemsToRemove;
-                      
-                      if (newQuantity <= 0) {
-                        // Remove item completely
-                        updatedState.inventory = updatedState.inventory.filter((_, idx) => idx !== itemIndex);
-                      } else {
-                        // Reduce quantity
-                        updatedState.inventory = updatedState.inventory.map((item, idx) => {
-                          if (idx === itemIndex) {
-                            return { ...item, quantity: newQuantity };
-                          }
-                          return item;
-                        });
-                      }
+                    updatedState.inventory = updatedInventory;
+                    
+                    // Add the loss to the impact summary without specific percentages
+                    const itemName = updatedState.items.find(item => item.id === randomItem.id)?.name || 'Unknown Item';
+                    if (event.impactSummary) {
+                      event.impactSummary.push(`-Some ${itemName}`);
+                    } else {
+                      event.impactSummary = [`-Some ${itemName}`];
                     }
                   }
                 }
@@ -506,45 +481,17 @@ export const useGlobalGameState = create<GameStateStore>((set, get) => {
           }
         }
         
-        // Add current day to the event
-        const eventWithDay = {
-          ...event,
-          day: updatedState.currentDay
-        };
+        // Save the updated state
+        setLocalStorage(STORAGE_KEY, updatedState);
         
-        // Add event to history and update current event
-        const finalState = {
-          ...updatedState,
-          currentEvent: eventWithDay,
-          eventHistory: [...updatedState.eventHistory, eventWithDay]
-        };
-        
-        // Save game state
-        setLocalStorage(STORAGE_KEY, finalState);
-        
-        return { 
-          gameState: finalState,
-          currentEvent: eventWithDay
-        };
+        // Set the current event
+        return { gameState: updatedState, currentEvent: event };
       });
     },
     
-    // Clear current event
+    // Clear a game event
     clearGameEvent: () => {
-      set(state => {
-        const updatedGameState = {
-          ...state.gameState,
-          currentEvent: null
-        };
-        
-        // Save game state
-        setLocalStorage(STORAGE_KEY, updatedGameState);
-        
-        return { 
-          gameState: updatedGameState,
-          currentEvent: null
-        };
-      });
+      set({ currentEvent: null });
     },
     
     // Deposit cash to bank
@@ -570,14 +517,14 @@ export const useGlobalGameState = create<GameStateStore>((set, get) => {
       });
     },
     
-    // Withdraw from bank to cash
+    // Withdraw cash from bank
     withdrawFromBank: (amount: number) => {
       set(state => {
         const { gameState } = state;
         
-        // Check if bank has enough money
+        // Check if player has enough in the bank
         if (gameState.bank < amount) {
-          throw new Error("Not enough money in the bank");
+          throw new Error("Not enough money in the bank to withdraw");
         }
         
         const updatedGameState = {
@@ -593,7 +540,7 @@ export const useGlobalGameState = create<GameStateStore>((set, get) => {
       });
     },
     
-    // Pay off debt
+    // Pay debt
     payDebt: (amount: number) => {
       set(state => {
         const { gameState } = state;
@@ -603,15 +550,13 @@ export const useGlobalGameState = create<GameStateStore>((set, get) => {
           throw new Error("Not enough cash to pay debt");
         }
         
-        // Check if payment is not greater than debt
-        if (amount > gameState.debt) {
-          throw new Error("Payment amount exceeds debt");
-        }
+        // Check if amount is more than debt
+        const actualPayment = Math.min(amount, gameState.debt);
         
         const updatedGameState = {
           ...gameState,
-          cash: gameState.cash - amount,
-          debt: gameState.debt - amount
+          cash: gameState.cash - actualPayment,
+          debt: gameState.debt - actualPayment
         };
         
         // Save game state
@@ -648,7 +593,71 @@ export const useGlobalGameState = create<GameStateStore>((set, get) => {
       });
     },
     
-    // Update player's cash (add or remove)
+    // Update health value
+    updateHealth: (amount: number) => {
+      set(state => {
+        const { gameState } = state;
+        
+        // Ensure health stays between 0 and 100
+        const newHealth = Math.min(100, Math.max(0, gameState.health + amount));
+        
+        const updatedGameState = {
+          ...gameState,
+          health: newHealth
+        };
+        
+        // Save game state
+        setLocalStorage(STORAGE_KEY, updatedGameState);
+        
+        return { gameState: updatedGameState };
+      });
+    },
+    
+    // Visit private doctor after winning a police gunfight
+    visitPrivateDoctor: (cost: number) => {
+      set(state => {
+        const { gameState } = state;
+        
+        // Check if player has enough money
+        if (gameState.cash < cost) {
+          throw new Error("Not enough cash to pay the doctor");
+        }
+        
+        // Update health to 100%, deduct cash, progress day unless it's day 30
+        const shouldProgressDay = gameState.currentDay < gameState.totalDays;
+        
+        let updatedGameState = {
+          ...gameState,
+          cash: gameState.cash - cost,
+          health: 100
+        };
+        
+        // Progress day if not the final day
+        if (shouldProgressDay) {
+          const nextDay = gameState.currentDay + 1;
+          
+          // Apply debt interest (rounded to nearest dollar)
+          const newDebt = Math.round(gameState.debt * (1 + gameState.debtInterestRate / 100));
+          
+          // Apply bank interest (rounded to nearest dollar)
+          const newBank = Math.round(gameState.bank * (1 + gameState.bankInterestRate / 100));
+          
+          updatedGameState = {
+            ...updatedGameState,
+            currentDay: nextDay,
+            debt: newDebt,
+            bank: newBank
+          };
+        }
+        
+        // Save game state
+        setLocalStorage(STORAGE_KEY, updatedGameState);
+        
+        return { gameState: updatedGameState };
+      });
+    },
+    
+    // Update cash amount
     updateCash: (amount: number) => {
       set(state => {
         const { gameState } = state;
@@ -666,7 +675,7 @@ export const useGlobalGameState = create<GameStateStore>((set, get) => {
       });
     },
     
-    // Update player's inventory space
+    // Update inventory space
     updateInventorySpace: (amount: number) => {
       set(state => {
         const { gameState } = state;
@@ -686,7 +695,7 @@ export const useGlobalGameState = create<GameStateStore>((set, get) => {
       });
     },
     
-    // Add an event to the history
+    // Add an event to history
     addToEventHistory: (event: GameEvent) => {
       set(state => {
         const { gameState } = state;

@@ -504,14 +504,46 @@ export default function EventDisplay({ onClose }: EventDisplayProps) {
   };
   
   const handleCompletePoliceEncounter = () => {
-    // Add the police encounter to history if needed
-    if (currentEvent && !gameState.eventHistory.some(event => event.id === currentEvent.id)) {
-      const updatedGameState = {
-        ...gameState,
-        eventHistory: [...gameState.eventHistory, currentEvent]
-      };
+    const { addToEventHistory, visitPrivateDoctor } = useGlobalGameState.getState();
+    
+    // Check if player defeated all cops
+    if (policeState.isComplete && policeState.numCops === 0) {
+      // Calculate private doctor cost ($1000-$3000)
+      const doctorCost = 1000 + Math.floor(Math.random() * 2001);
       
-      setLocalStorage("nyc-hustler-game-state", updatedGameState);
+      // Check if player can afford doctor
+      if (gameState.cash >= doctorCost) {
+        // Show confirmation dialog
+        const confirmDoctor = window.confirm(
+          `After your gunfight with the police, you need to see a private doctor to recover. 
+          The doctor will charge $${doctorCost} and you'll need to lay low for a day. Do you want to proceed?`
+        );
+        
+        if (confirmDoctor) {
+          try {
+            // Pay doctor, recover fully, and lose a day
+            visitPrivateDoctor(doctorCost);
+            
+            // Add event to history for record keeping
+            if (currentEvent) {
+              addToEventHistory(currentEvent);
+            }
+            
+            onClose();
+            return;
+          } catch (error) {
+            console.error("Error visiting doctor:", error);
+            alert("Not enough cash to pay the doctor!");
+          }
+        }
+      } else {
+        alert("You don't have enough cash to pay a private doctor ($" + doctorCost + "). You'll need to recover on your own.");
+      }
+    }
+    
+    // Add the police encounter to history if needed
+    if (currentEvent) {
+      addToEventHistory(currentEvent);
     }
     
     onClose();
