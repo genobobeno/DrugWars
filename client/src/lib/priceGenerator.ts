@@ -28,15 +28,17 @@ export function generatePrices(
       activeEvents[drug.id] = isEvent;
 
       let price: number;
+      let minPrice: number;
+      let maxPrice: number;
 
       if (isEvent) {
         // Use event price range
-        const [min, max] = drug.eventParameters;
-        price = min + Math.random() * (max - min);
+        [minPrice, maxPrice] = drug.eventParameters;
+        price = minPrice + Math.random() * (maxPrice - minPrice);
       } else {
         // Use normal price range
-        const [min, max] = drug.noEventParameters;
-        price = min + Math.random() * (max - min);
+        [minPrice, maxPrice] = drug.noEventParameters;
+        price = minPrice + Math.random() * (maxPrice - minPrice);
       }
 
       // Apply location-based factor if a borough is provided
@@ -46,11 +48,25 @@ export function generatePrices(
             drug.category as keyof typeof currentBorough.priceFactors
           ] || 1;
         price *= locationFactor;
+        
+        // Ensure price stays within the defined range for the drug
+        // even after borough multipliers are applied
+        if (!isEvent) {
+          // For normal prices
+          price = Math.min(Math.max(price, minPrice), maxPrice);
+        } else {
+          // For event prices
+          price = Math.min(Math.max(price, minPrice), maxPrice);
+        }
       }
 
-      // Add small random variation to make prices look more natural
-      // price = price * (0.95 + Math.random() * 0.1);
-
+      // Apply additional checks to keep drug prices within reasonable limits
+      // Get the maximum allowed price from the drug range parameters
+      const absoluteMax = isEvent ? Math.max(...drug.eventParameters) : Math.max(...drug.noEventParameters);
+      
+      // Ensure price doesn't exceed the maximum for this drug
+      price = Math.min(price, absoluteMax);
+      
       // Round to nearest dollar
       prices[drug.id] = Math.round(price);
     } else {
