@@ -49,21 +49,21 @@ function App() {
     }
   }, [initGame, setBackgroundMusic]);
   
-  // Force restart function for development
+  // Reset game function for development
   const forceResetGame = () => {
-    console.log("FORCE RESET: Manually clearing all game data");
+    console.log("RESET: Manually clearing all game data");
     localStorage.removeItem(STORAGE_KEY);
     window.location.reload();
   };
 
   return (
     <div className="w-full min-h-screen bg-background text-foreground overflow-y-auto overflow-x-hidden pb-24 relative">
-      {/* Add force reset button (only visible during development) */}
+      {/* Add reset button (only visible during development) */}
       <button 
         onClick={forceResetGame}
         className="fixed top-2 right-2 z-50 bg-red-600 text-white px-2 py-1 text-xs rounded shadow"
       >
-        Force Reset Game
+        Reset Game
       </button>
       
       {/* Global styles to ensure scrolling works properly */}
