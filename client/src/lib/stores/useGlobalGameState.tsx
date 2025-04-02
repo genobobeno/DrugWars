@@ -349,7 +349,52 @@ export const useGlobalGameState = create<GameStateStore>((set, get) => {
           for (const effect of event.effects) {
             switch (effect.type) {
               case 'cash':
-                updatedState.cash = Math.max(0, updatedState.cash + effect.value);
+                // Handle different cash effect scenarios
+                if (effect.value < 0) {
+                  let deductionAmount = Math.abs(effect.value);
+                  
+                  // Special case: value is -1 means percentage-based reduction
+                  if (deductionAmount === 1) {
+                    // For mugging: 10-40% of cash
+                    if (event.id === "health_mugging") {
+                      const percentage = 10 + Math.floor(Math.random() * 31); // 10-40%
+                      deductionAmount = Math.floor(updatedState.cash * percentage / 100);
+                      
+                      // Update the event description with the actual amount
+                      event.description = `You were attacked and robbed while traveling through a dangerous neighborhood. They took $${deductionAmount} (${percentage}% of your cash).`;
+                      event.impactSummary = ["-15 health", `-$${deductionAmount} cash (${percentage}%)`];
+                    }
+                    // For lost wallet: 15-25% of cash
+                    else if (event.id === "cash_lost_wallet") {
+                      const percentage = 15 + Math.floor(Math.random() * 11); // 15-25%
+                      deductionAmount = Math.floor(updatedState.cash * percentage / 100);
+                      
+                      // Update the event description with the actual amount
+                      event.description = `You lost your wallet while traveling. You lost $${deductionAmount} (${percentage}% of your cash).`;
+                      event.impactSummary = [`-$${deductionAmount} cash (${percentage}%)`];
+                    }
+                  } 
+                  // For fixed amount events like police bribes, debt collectors, cap at available cash
+                  else if (event.id === "police_bribe" || event.id === "debt_collector") {
+                    deductionAmount = Math.min(deductionAmount, updatedState.cash);
+                    
+                    // Update descriptions for these events
+                    if (event.id === "police_bribe") {
+                      event.description = `A police officer stopped you and demanded a small bribe to avoid any trouble. You paid $${deductionAmount}.`;
+                      event.impactSummary = [`-$${deductionAmount} cash`];
+                    }
+                    else if (event.id === "debt_collector") {
+                      event.description = `A debt collector tracked you down and demanded an immediate payment of $${deductionAmount}. This reduces your debt by $300.`;
+                      event.impactSummary = [`-$${deductionAmount} cash`, "-$300 debt"];
+                    }
+                  }
+                  
+                  // Apply the deduction
+                  updatedState.cash = Math.max(0, updatedState.cash - deductionAmount);
+                } else {
+                  // For positive cash effects, just add the amount
+                  updatedState.cash += effect.value;
+                }
                 break;
               case 'debt':
                 updatedState.debt = Math.max(0, updatedState.debt + effect.value);

@@ -12,7 +12,7 @@ const policeEvents: GameEvent[] = [
     title: "Police Checkpoint",
     description: "You ran into a police checkpoint while traveling. They searched your belongings but found nothing of interest.",
     effect: "neutral",
-    probability: 0.15,
+    probability: 0.08, // Reduced from 0.15
     effects: []
   },
   {
@@ -22,7 +22,7 @@ const policeEvents: GameEvent[] = [
     title: "Police Raid",
     description: "The police raided the area you were in! You had to dump some items to avoid getting caught.",
     effect: "negative",
-    probability: 0.1,
+    probability: 0.05, // Reduced from 0.1
     effects: [
       { type: "inventory", value: -10 }
     ],
@@ -33,13 +33,14 @@ const policeEvents: GameEvent[] = [
     type: "police",
     category: "travel",
     title: "Corrupt Officer",
-    description: "A police officer stopped you and hinted at wanting a bribe of $500 to avoid any trouble.",
+    description: "A police officer stopped you and demanded a small bribe to avoid any trouble. You paid the minimum of $400 or all your cash.",
     effect: "negative",
-    probability: 0.1,
+    probability: 0.05, // Reduced from 0.1
+    // The actual value will be calculated dynamically in EventDisplay
     effects: [
-      { type: "cash", value: -500 }
+      { type: "cash", value: -400 } // This will be capped by available cash in the component
     ],
-    impactSummary: ["-$500 cash (if you have it)"]
+    impactSummary: ["Lost some cash (up to $400)"]
   }
 ];
 
@@ -52,7 +53,7 @@ const policeEncounterEvents: GameEvent[] = [
     title: "Police Encounter",
     description: "You've encountered the police! What will you do?",
     effect: "neutral",
-    probability: 0.15, // 15% daily chance
+    probability: 0.25, // Increased from 0.15 to 0.25
     // This event will be handled with special UI in EventDisplay component
   }
 ];
@@ -101,14 +102,14 @@ const healthEvents: GameEvent[] = [
     type: "health",
     category: "travel",
     title: "Mugged!",
-    description: "You were attacked and robbed while traveling through a dangerous neighborhood. They took $200 from you if you had it.",
+    description: "You were attacked and robbed while traveling through a dangerous neighborhood. They took between 10-40% of your cash.",
     effect: "negative",
     probability: 0.12,
     effects: [
       { type: "health", value: -15 },
-      { type: "cash", value: -200 }
+      { type: "cash", value: -1 } // The actual percentage will be calculated in the EventDisplay component
     ],
-    impactSummary: ["-15 health", "-$200 cash (if you have it)"]
+    impactSummary: ["-15 health", "Lost 10-40% of your cash"]
   },
   {
     id: "health_food_poisoning",
@@ -175,14 +176,14 @@ const debtEvents: GameEvent[] = [
     type: "debt",
     category: "daily",
     title: "Debt Collector",
-    description: "A debt collector tracked you down and demanded an immediate payment of $300. This reduces your debt by $200.",
+    description: "A debt collector tracked you down and demanded an immediate payment of up to $400. This reduces your debt by $300.",
     effect: "negative",
     probability: 0.1,
     effects: [
-      { type: "cash", value: -300 },
-      { type: "debt", value: -200 }
+      { type: "cash", value: -400 }, // Will be capped by available cash in component
+      { type: "debt", value: -300 }
     ],
-    impactSummary: ["-$300 cash (if you have it)", "-$200 debt"]
+    impactSummary: ["Lost up to $400 cash", "-$300 debt"]
   },
   {
     id: "debt_interest_break",
@@ -206,13 +207,13 @@ const cashEvents: GameEvent[] = [
     type: "cash",
     category: "travel",
     title: "Lost Wallet",
-    description: "You lost your wallet while traveling. You lost $150 cash.",
+    description: "You lost your wallet while traveling. You lost some of your cash.",
     effect: "negative",
     probability: 0.08,
     effects: [
-      { type: "cash", value: -150 }
+      { type: "cash", value: -1 } // Will be calculated as a percentage in EventDisplay
     ],
-    impactSummary: ["-$150 cash (if you have it)"]
+    impactSummary: ["Lost 15-25% of your cash"]
   },
   {
     id: "cash_gambling_win",
@@ -281,20 +282,21 @@ export function getRandomEvent(category: EventCategory, gameState: GameState): G
     return null;
   }
   
-  // Filter out events that require cash if player doesn't have enough
+  // Filter out events that require cash if player doesn't have any
   eligibleEvents = eligibleEvents.filter(event => {
     // Check if event has cash effects that deduct money
     if (event.effects) {
       const cashEffect = event.effects.find(effect => effect.type === 'cash' && effect.value < 0);
       if (cashEffect) {
-        // For cash deduction events, ensure player has enough cash
-        return gameState.cash >= Math.abs(cashEffect.value);
+        // For percentage-based events (value = -1), player just needs any cash
+        if (cashEffect.value === -1) {
+          return gameState.cash > 0;
+        } else {
+          // For fixed-amount events, check the specific amount (but will be capped in component)
+          // For police_bribe, debt_collector, etc. we'll set a minimum of having at least $50
+          return gameState.cash >= Math.min(50, Math.abs(cashEffect.value));
+        }
       }
-    }
-    
-    // Special case for police_bribe (id-based check as fallback)
-    if (event.id === "police_bribe" && gameState.cash < 500) {
-      return false;
     }
     
     return true;
